@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.organization.dao.SyncLogDao">
+    <!--查询最后一次更新成功的syncLog-->
+    <select id="getLatestFalseLog" resultType="com.oa.organization.entity.SyncLog">
+        SELECT TOP 1 ModelName,TableName,SyncDate,SyncStatu FROM SyncLog
+        WHERE ModelName = 'DingTalk' AND TableName = 'T011'
+        AND SyncStatu = 'F' ORDER BY SyncDate DESC
+    </select>
+
+    <select id="getLatestSuccessLog" resultType="com.oa.organization.entity.SyncLog">
+        SELECT TOP 1 ModelName,TableName,SyncDate,SyncStatu FROM SyncLog
+        WHERE ModelName = 'DingTalk' AND TableName = 'T011'
+        AND SyncStatu = 'S' ORDER BY SyncDate DESC
+    </select>
+    <!-- 更新,只需要更新状态 -->
+    <update id="updateLog" parameterType="com.oa.organization.entity.SyncLog">
+        UPDATE SyncLog
+        SET
+            SyncStatu = #{syncStatu}
+        WHERE
+            ModelName = #{modelName} AND TableName=#{tableName} AND SyncDate = (SELECT MAX(SyncDate) FROM  SyncLog)
+    </update>
+    <!-- 更新之前和更新完成之后都需要记录数据-->
+    <insert id="insertLog" parameterType="com.oa.organization.entity.SyncLog">
+        INSERT INTO SyncLog(ModelName,TableName,SyncDate,SyncStatu)VALUES
+            (#{modelName},#{tableName},#{syncDate},#{syncStatu})
+    </insert>
+</mapper>

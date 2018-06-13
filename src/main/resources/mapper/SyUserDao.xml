@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.organization.dao.SyUserDao">
+    <!-- 目的:为DAO接口方法提供sql语句配置-->
+    <select id="getUserList" resultType="com.oa.organization.entity.SyUser">
+        /*排除掉三个管理员组的成员*/
+    SELECT
+        PERNR  AS "jobNumber",
+            NACHN  AS "chName",
+            STAT2  AS "status",
+            GESCH  AS "sex",
+            Z_GRPH AS "personalMobile",
+            Z_BGSJ AS "officeMobile",
+            Z_BGPH AS "officeTelephone",
+            Z_BGDZ AS "officeAddress",
+            Z_GREM AS "personalEmail",
+            Z_BGEM AS "officeEmail",
+            ORGEH  AS "departmentId",
+            STEXT  AS "departmentName",
+            PLSTX AS "position"
+        FROM
+        T011
+        WHERE
+        ORGEH IN ('00010551',
+        '00000291','00000361','00000362','00000363','00010025','00000378','00001264',
+        '00000511','00000563','00000564',
+        '00000608','00010331','00010332','00010319','00010317',
+        '00000709','00000736','00000737',
+        '00000815','00000837','00000838',
+        '00000915','00000927','00000928',
+        '00001009','00010817','00010818',
+        '00001108','00001132','00001133',
+        '00001215','00001233','00001234',
+        '00001313','00001329','00001330',
+        '00010085','00001510',
+        '00010786'
+        ) AND STAT2 IN('0','1','2')AND  SEND_DATE = '2018-05-22 00:00:00.000' AND PERNR&lt;&gt;'110175'
+    </select>
+    <!-- 根据部门id查询部门下的成员-->
+    <select id="getUserListByDeptId" parameterType="java.math.BigDecimal"
+            resultType="com.oa.organization.entity.SyUser">
+        SELECT
+            PERNR  AS "jobNumber",
+            NACHN  AS "chName",
+            STAT2  AS "status",
+            GESCH  AS "sex",
+            Z_GRPH AS "personalMobile",
+            Z_BGSJ AS "officeMobile",
+            Z_BGPH AS "officeTelephone",
+            Z_BGDZ AS "officeAddress",
+            Z_GREM AS "personalEmail",
+            Z_BGEM AS "officeEmail",
+            ORGEH  AS "departmentId",
+            STEXT  AS "departmentName",
+            PLSTX AS "position"
+        FROM T011 WHERE ORGEH = #{deptId} AND STAT2 IN('0','1','2')
+              AND SEND_DATE = '2018-05-22 00:00:00'
+    </select>
+    <!-- 模拟测试新增加的手机号码的功能,新增人员,新增人员以办公手机为准-->
+    <select id="getNewUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
+        /*select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
+        DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and not exists (select PERNR from dbo.T011 where
+        DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR)
+        */
+        SELECT
+            PERNR  AS "jobNumber",
+            NACHN  AS "chName",
+            STAT2  AS "status",
+            GESCH  AS "sex",
+            Z_GRPH AS "personalMobile",
+            Z_BGSJ AS "officeMobile",
+            Z_BGPH AS "officeTelephone",
+            Z_BGDZ AS "officeAddress",
+            Z_GREM AS "personalEmail",
+            Z_BGEM AS "officeEmail",
+            ORGEH  AS "departmentId",
+            STEXT  AS "departmentName",
+            PLSTX AS "position"
+        FROM dbo.T011 AS t1
+        WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
+              AND EXISTS(SELECT Z_BGSJ
+                         FROM dbo.T011
+                         WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
+                               AND PERNR = t1.PERNR
+                               AND Z_BGSJ = ''
+                               AND Z_BGSJ &lt;&gt; t1.Z_BGSJ)
+    </select>
+    <!--模拟测试人员离职的功能 -->
+    <select id="getLeaveUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
+        /*select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
+        DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and STAT2 = 5 and exists (select STAT2 from dbo.T011 where
+        DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR and STAT2 &lt;&gt; t1.STAT2)*/
+        SELECT
+            PERNR  AS "jobNumber",
+            NACHN  AS "chName",
+            STAT2  AS "status",
+            GESCH  AS "sex",
+            Z_GRPH AS "personalMobile",
+            Z_BGSJ AS "officeMobile",
+            Z_BGPH AS "officeTelephone",
+            Z_BGDZ AS "officeAddress",
+            Z_GREM AS "personalEmail",
+            Z_BGEM AS "officeEmail",
+            ORGEH  AS "departmentId",
+            STEXT  AS "departmentName",
+            PLSTX AS "position"
+        FROM dbo.T011 AS t1
+        WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
+              AND STAT2 IN ('4','5')
+              AND EXISTS(SELECT STAT2
+                         FROM dbo.T011
+                         WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
+                               AND PERNR = t1.PERNR
+                               AND STAT2 &lt;&gt; t1.STAT2)
+    </select>
+    <!--模拟人员信息变更-->
+    <select id="getUpdateUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
+        SELECT
+            PERNR  AS "jobNumber",
+            NACHN  AS "chName",
+            STAT2  AS "status",
+            GESCH  AS "sex",
+            Z_GRPH AS "personalMobile",
+            Z_BGSJ AS "officeMobile",
+            Z_BGPH AS "officeTelephone",
+            Z_BGDZ AS "officeAddress",
+            Z_GREM AS "personalEmail",
+            Z_BGEM AS "officeEmail",
+            ORGEH  AS "departmentId",
+            STEXT  AS "departmentName",
+            PLSTX AS "position"
+        FROM dbo.T011 AS t1
+        WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
+              AND EXISTS(SELECT PERNR
+                         FROM dbo.T011
+                         WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
+                               AND PERNR = t1.PERNR
+                               AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH))
+    </select>
+    <select id="getAllUserIdList" resultType="java.math.BigDecimal">
+        SELECT
+            PERNR  AS "jobNumber"
+        FROM T011
+        WHERE STAT2 IN('0','1','2')
+              AND SEND_DATE = '2018-05-22 00:00:00'
+    </select>
+    <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
+    <update id="updateUser" parameterType="java.util.HashMap">
+        UPDATE T011
+        SET
+            NACHN = #{chName},
+            Z_BGSJ = #{officeMobile}
+        WHERE
+            OBJID = #{jobNumber}
+    </update>
+    <!-- 删除-->
+    <delete id="deleteDeptById" parameterType="java.math.BigDecimal">
+        DELETE FROM T011
+        WHERE OBJID = #{jobNumber}
+    </delete>
+</mapper>

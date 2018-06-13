@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <!-- 这个配置文件是logback官网拿过来的，没有经过改动，不会有错-->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- 按照每天生成日志文件 -->
+    <appender name="file"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- append: 如果是 true，日志被追加到文件结尾，如果是 false，清空现存文件，默认是true -->
+        <!-- <append>true</append> -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 指定日志保存的文件名和路径，不写会根据fileNamePattern动态变化 -->
+            <!-- <file>logs/app.log</file> -->
+            <!--日志文件输出的文件名-->
+            <fileNamePattern>${LOG_HOME}/myApp.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 控制保留的归档文件的最大数量，超出数量就删除旧文件 -->
+            <!-- <MaxHistory>30</MaxHistory> -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <!--日志文件最大的大小-->
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>10MB</maxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <root level="error">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

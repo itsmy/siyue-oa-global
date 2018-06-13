@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.oa.organization.dao.SyDepartmentDao">
+    <!-- 获取所有部门-->
+    <select id="getDepartmentList" resultType="com.oa.organization.entity.SyDepartment">
+        WITH DEP AS (
+        SELECT
+        OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
+        FROM
+        dbo.T012
+        WHERE
+        OBJID = '00000001'
+        UNION ALL
+        SELECT
+        T012.OBJID,T012.STEXT,T012.ZP_OBJID,T012.ZP_STEXT,T012.ZC_OBJID,T012.ZC_STEXT,T012.PERNR,
+        T012.NACHN,T012.Z_BMCJ,T012.KOSTL,T012.LTEXT,T012.BEGDA,T012.ENDDA,T012.SEND_DATE
+        FROM
+        DEP,T012
+        WHERE
+        DEP.OBJID = T012.ZP_OBJID
+        ) SELECT
+            OBJID    AS "departmentId",
+            STEXT    AS "departmentName",
+            ZP_OBJID AS "fatherDeptId",
+            ZP_STEXT AS "fatherDeptName",
+            ZC_OBJID AS "companyId",
+            ZC_STEXT AS "companyName",
+            PERNR    AS "jobNumber",
+            NACHN    AS "chName",
+            Z_BMCJ   AS "deptLevel",
+            KOSTL    AS "primeCentId",
+            LTEXT    AS "primeCentName",
+            BEGDA    AS "beginDate",
+            ENDDA    AS "endDate"
+        FROM
+        DEP
+        WHERE
+        SEND_DATE='2018-05-22 00:00:00.000'
+        AND
+        OBJID &lt;&gt; '00000001'
+    </select>
+    <!-- 查询所有的部门id-->
+    <select id="getDeptIdList" resultType="java.math.BigDecimal">
+        WITH DEP AS (
+        SELECT
+        OBJID,SEND_DATE
+        FROM
+        dbo.T012
+        WHERE
+        OBJID = '00000001'
+        UNION ALL
+        SELECT
+        T012.OBJID,T012.SEND_DATE
+        FROM
+        DEP,T012
+        WHERE
+        DEP.OBJID = T012.ZP_OBJID
+        ) SELECT
+        OBJID AS "departmentId"
+        FROM
+        DEP
+        WHERE
+        SEND_DATE='2018-05-22 00:00:00.000'
+        AND
+        OBJID &lt;&gt; '00000001'
+    </select>
+    <!-- 查询某个部门下的所有子部门，含递归-->
+    <select id="getSubDeptListByFatherId" parameterType="java.math.BigDecimal"
+            resultType="com.oa.organization.entity.SyDepartment">
+        WITH DEP AS (
+            SELECT
+                OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
+            FROM
+                dbo.T012
+            WHERE
+                OBJID = #{fatherDeptId}
+            UNION ALL
+                SELECT
+                    T012.OBJID,T012.STEXT,T012.ZP_OBJID,T012.ZP_STEXT,T012.ZC_OBJID,T012.ZC_STEXT,T012.PERNR,
+                    T012.NACHN,T012.Z_BMCJ,T012.KOSTL,T012.LTEXT,T012.BEGDA,T012.ENDDA,T012.SEND_DATE
+                FROM
+                    DEP,T012
+                WHERE
+                    DEP.OBJID = T012.ZP_OBJID
+        ) SELECT
+            OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
+        FROM
+            DEP
+        WHERE
+            SEND_DATE='2018-05-22 00:00:00.000'
+        AND
+            OBJID &lt;&gt; #{fatherDeptId}
+    </select>
+    <!--根据父部门id查询子部门 -->
+    <select id="getDeptListByFatherId" parameterType="java.math.BigDecimal"
+            resultType="com.oa.organization.entity.SyDepartment">
+        SELECT
+            OBJID    AS "departmentId",
+            STEXT    AS "departmentName",
+            ZP_OBJID AS "fatherDeptId",
+            ZP_STEXT AS "fatherDeptName",
+            ZC_OBJID AS "companyId",
+            ZC_STEXT AS "companyName",
+            PERNR    AS "jobNumber",
+            NACHN    AS "chName",
+            Z_BMCJ   AS "deptLevel",
+            KOSTL    AS "primeCentId",
+            LTEXT    AS "primeCentName",
+            BEGDA    AS "beginDate",
+            ENDDA    AS "endDate"
+        FROM T012 WHERE ZP_OBJID = #{fatherDeptId} AND SEND_DATE='2018-05-22 00:00:00.000'
+    </select>
+    <!-- 根据部门id获取部门信息-->
+    <select id="getDeptById" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.SyDepartment">
+        SELECT
+            OBJID    AS "departmentId",
+            STEXT    AS "departmentName",
+            ZP_OBJID AS "fatherDeptId",
+            ZP_STEXT AS "fatherDeptName",
+            ZC_OBJID AS "companyId",
+            ZC_STEXT AS "companyName",
+            PERNR    AS "jobNumber",
+            NACHN    AS "chName",
+            Z_BMCJ   AS "deptLevel",
+            KOSTL    AS "primeCentId",
+            LTEXT    AS "primeCentName",
+            BEGDA    AS "beginDate",
+            ENDDA    AS "endDate"
+        FROM T012 WHERE OBJID = #{departmentId} AND SEND_DATE='2018-05-22 00:00:00.000'
+    </select>
+    <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
+    <update id="updateDeptById" parameterType="java.util.HashMap">
+        UPDATE T012
+        SET
+            STEXT = #{departmentName}
+        WHERE
+            OBJID = #{departmentId}
+    </update>
+    <!-- ndash; 删除,搁置&ndash;&gt; -->
+    <delete id="deleteDeptById" parameterType="java.math.BigDecimal">
+        DELETE FROM T012
+        WHERE OBJID = #{deptId}
+    </delete>
+</mapper>

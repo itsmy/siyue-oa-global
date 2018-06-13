@@ -1,0 +1,25 @@
+关于部门的删除问题:1.取出要删除的部门(暂且标记为d)下的成员(不递归)，
+2.将这些成员放到要删除的部门d的父部门f下
+3.将要删除的部门的子部门s的父部门设置为f
+4.删除部门d
+注:关于部门d下的成员会在成员同步的时候更新，对于不存在的部门，他下面的成员要么离职，要么更换部门，可以通过sql查询出来
+考虑一下异常的问题
+        WITH DEP AS (
+            SELECT
+                OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
+            FROM
+                dbo.T012
+            WHERE
+                OBJID = '00000020'
+            UNION ALL
+                SELECT
+                    T012.OBJID,T012.STEXT,T012.ZP_OBJID,T012.ZP_STEXT,T012.ZC_OBJID,T012.ZC_STEXT,T012.PERNR,
+                    T012.NACHN,T012.Z_BMCJ,T012.KOSTL,T012.LTEXT,T012.BEGDA,T012.ENDDA,T012.SEND_DATE
+                FROM
+                    DEP,T012
+                WHERE
+                    DEP.OBJID = T012.ZP_OBJID
+        ) SELECT
+            OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
+        FROM
+            DEP WHERE SEND_DATE='2018-05-22 00:00:00.000' AND OBJID <> '00000020'

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+erp_id nvarchar(8),
+dd_id nvarchar(10),getDeptIdList
+parent_id numeric(8),
+erp_name nvarchar(225),
+company_id numeric(8),
+company_name nvarchar(40)
+-->
+<mapper namespace="com.oa.organization.dao.DeptRecordDao">
+    <!--注意gis的表名字和股份公司的不一样-->
+    <insert id="createDept" parameterType="com.oa.organization.entity.DeptRecord">
+        INSERT INTO DEPT_RECORD (erp_id, dd_id, parent_id, erp_name,company_id,company_name) VALUES
+            (#{erpId}, #{ddId}, #{parentId}, #{erpName}, #{companyId}, #{companyName})
+    </insert>
+    <!-- 删除-->
+    <delete id="deleteDept" parameterType="java.math.BigDecimal">
+        DELETE FROM DEPT_RECORD
+        WHERE erp_id = #{erpId}
+    </delete>
+    <!-- 更新,parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
+    <update id="updateDept" parameterType="java.util.HashMap">
+        UPDATE DEPT_RECORD
+        SET
+            erp_id = #{deptErpId},
+            parent_id  = #{deptParentId},
+            erp_name = #{deptErpName}
+        WHERE
+            erp_id = #{deptErpId}
+    </update>
+    <!--查询一个 -->
+    <select id="getDept" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.DeptRecord">
+        SELECT
+            erp_id    AS "erpId",
+            dd_id     AS "ddId",
+            parent_id AS "parentId",
+            erp_name  AS "erpName",
+            company_id AS "companyId",
+            company_name  AS "companyName"
+        FROM DEPT_RECORD
+        WHERE erp_id = #{erpId}
+    </select>
+    <!-- 查询多个部门 -->
+    <select id="getDeptList" resultType="com.oa.organization.entity.DeptRecord">
+        SELECT
+            erp_id    AS "erpId",
+            dd_id     AS "ddId",
+            parent_id AS "parentId",
+            erp_name  AS "erpName",
+            company_id AS "companyId",
+            company_name  AS "companyName"
+        FROM DEPT_RECORD
+    </select>
+    <!-- 查询所有子部门id -->
+    <select id="getSubDeptIdByParent" resultType="java.math.BigDecimal">
+        SELECT
+            erp_id    AS "erpId",
+            dd_id     AS "ddId",
+            parent_id AS "parentId",
+            erp_name  AS "erpName",
+            company_id AS "companyId",
+            company_name  AS "companyName"
+        FROM DEPT_RECORD
+    </select>
+    <select id="getDeptIdList" resultType="java.math.BigDecimal">
+        SELECT erp_id  AS "erpId" FROM DEPT_RECORD
+    </select>
+
+    <insert id="insertDept" parameterType="com.oa.organization.entity.DeptRecord">
+        INSERT INTO DEPT_RECORD(erp_id,dd_id,parent_id,erp_name,company_id,company_name)VALUES
+            (#{erpId},#{ddId},#{parentId},#{erpName},#{companyId},#{companyName})
+    </insert>
+</mapper>

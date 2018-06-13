@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.organization.dao.UserRecordDao">
+    <!-- 目的:为DAO接口方法提供sql语句配置-->
+    <!--注意gis的表名字和股份公司的不一样-->
+    <insert id="createUser" parameterType="com.oa.organization.entity.UserRecord">
+        INSERT INTO USER_RECORD (job_number, ch_name, personal_mobile,office_mobile,office_telephone,
+        office_address,personal_email,office_email,dd_dept_id,erp_dept_id,department_name,position) VALUES
+            (#{jobNumber}, #{chName}, #{personalMobile},#{officeMobile}, #{officeTelephone}, #{officeAddress},
+             #{personalEmail},#{officeEmail}, #{ddDeptId}, #{erDeptId}, #{departmentName}, #{position})
+    </insert>
+    <!-- 删除-->
+    <delete id="deleteUser" parameterType="java.lang.String">
+        DELETE FROM USER_RECORD
+        WHERE job_number = #{jobNumber}
+    </delete>
+    <!-- 更新,姓名，手机，邮箱，部门，职位均会发生变化-->
+    <update id="updateUser" parameterType="java.util.HashMap">
+        UPDATE USER_RECORD
+        SET
+            job_number = #{jobNumber},
+            office_mobile  = #{officeMobile},
+            office_email = #{officeEmail},
+            dd_dept_id  = #{ddDeptId},
+            erp_dept_id  = #{erDeptId},
+            department_name  = #{departmentName},
+            position  = #{position}
+            WHERE job_number = #{jobNumber}
+    </update>
+    <!--根据部门查询成员 -->
+    <select id="getUserListByDeptId" parameterType="java.lang.String"
+            resultType="com.oa.organization.entity.UserRecord">
+        SELECT
+             job_number as "jobNumber",
+             ch_name as "chName",
+             personal_mobile as "personalMobile",
+             office_mobile as "officeMobile",
+             office_telephone as "officeTelephone",
+             office_address as "officeAddress",
+             personal_email as "personalEmail",
+             office_email as "officeEmail",
+             dd_dept_id as "ddDeptId",
+             erp_dept_id as "erDeptId",
+             department_name as "departmentName",
+             position as "position"
+        FROM USER_RECORD
+        WHERE dd_dept_id = #{ddDeptId}
+    </select>
+    <!-- 查询多个 -->
+    <select id="getAllUserList" resultType="com.oa.organization.entity.UserRecord">
+        SELECT
+             job_number as "jobNumber",
+             ch_name as "chName",
+             personal_mobile as "personalMobile",
+             office_mobile as "officeMobile",
+             office_telephone as "officeTelephone",
+             office_address as "officeAddress",
+             personal_email as "personalEmail",
+             office_email as "officeEmail",
+             dd_dept_id as "ddDeptId",
+             erp_dept_id as "erDeptId",
+             department_name as "departmentName",
+             position as "position"
+        FROM USER_RECORD
+    </select>
+
+    <select id="getAllUserIdList" resultType="java.math.BigDecimal">
+        SELECT
+             job_number as "jobNumber"
+        FROM USER_RECORD
+        WHERE STAT2 IN('0','1','2')
+              AND SEND_DATE = '2018-05-22 00:00:00'
+    </select>
+    <!-- 批量插入数据-->
+    <insert id="insertUserList" parameterType="java.util.List">
+        INSERT INTO USER_RECORD(job_number, ch_name, personal_mobile,office_mobile,office_telephone,
+        office_address,personal_email,office_email,dd_dept_id,erp_dept_id,department_name,position)VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{jobNumber}, #{chName}, #{personalMobile},#{officeMobile}, #{officeTelephone},
+            #{officeAddress}, #{personalEmail},#{officeEmail}, #{ddDeptId}, #{erDeptId}, #{departmentName}, #{position})
+        </foreach>
+    </insert>
+</mapper>
