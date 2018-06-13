@@ -2,10 +2,10 @@ package com.oa.common.util;
 
 public class Env {
     /*股份公司所有信息*/
-    public static final String CORP_ID = "dingc5cc1be25c58c8da";
-    public static final String CORP_SECRET = "9QHrT1ejb2hLA9TKI3TFHpBQrhqZImX-qEsnhyjRDOuXAHxapkNBn61F725NjpGs";
-    public static final String SSO_Secret = "wSXK3RbbUeryRi3zaqHQ0APatwhSJ1XFtKZ3gNiyoZOHMFTktVLaG8aYBnHjGAdm";
-    public static final String agent_id = "176855488";
+    public static final String CORP_ID = "";
+    public static final String CORP_SECRET = "";
+    public static final String SSO_Secret = "";
+    public static final String agent_id = "";
     /**
      * DING API地址
      */
