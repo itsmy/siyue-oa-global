@@ -116,40 +116,8 @@
                                AND STAT2 &lt;&gt; t1.STAT2)
     </select>
     <!--模拟人员信息变更-->
-
     <select id="getUpdateUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
-
-   SELECT
-	PERNR AS "jobNumber",
-	NACHN AS "chName",
-	STAT2 AS "status",
-	GESCH AS "sex",
-	Z_GRPH AS "personalMobile",
-	Z_BGSJ AS "officeMobile",
-	Z_BGPH AS "officeTelephone",
-	Z_BGDZ AS "officeAddress",
-	Z_GREM AS "personalEmail",
-	Z_BGEM AS "officeEmail",
-	ORGEH AS "departmentId",
-	STEXT AS "departmentName",
-	PLSTX AS "position"
-FROM
-	dbo.T011
-WHERE
-1= #{dateDiffer} AND
-	ORGEH IN (
-		'00000301',
-		'00000373',
-		'00000374',
-		'00000375',
-		'00000376',
-		'00000377',
-		'00001231',
-		'00001232'
-	) AND SEND_DATE='2018-05-22 00:00:00'
-    </select>
-    <select id="getAllUserIdList" resultType="java.math.BigDecimal">
-       SELECT
+     SELECT
             PERNR  AS "jobNumber",
             NACHN  AS "chName",
             STAT2  AS "status",
@@ -170,6 +138,13 @@ WHERE
             WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
             AND PERNR = t1.PERNR
             AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH OR PLSTX &lt;&gt; t1.PLSTX))
+    </select>
+    <select id="getAllUserIdList" resultType="java.math.BigDecimal">
+        SELECT
+            PERNR  AS "jobNumber"
+        FROM T011
+        WHERE STAT2 IN('0','1','2')
+              AND SEND_DATE = '2018-05-22 00:00:00'
     </select>
     <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
     <update id="updateUser" parameterType="java.util.HashMap">
