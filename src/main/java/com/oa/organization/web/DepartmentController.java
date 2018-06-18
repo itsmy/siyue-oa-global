@@ -1,5 +1,7 @@
 package com.oa.organization.web;
 
+import com.oa.common.enums.ResultCode;
+import com.oa.common.vo.Result;
 import com.oa.organization.service.impl.DepartmentServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,22 +19,14 @@ public class DepartmentController {
 
     //为了方便测试先写全部写成get接口
     @RequestMapping(value = "/department/create", method = RequestMethod.GET)
-    public String createDepartment() throws Exception {
-        try {
-            departmentService.createDeptMut();
-            return "ok";
-        } catch (Exception e) {
-            return "sorry";
-        }
+    public Result createDepartment() throws Exception {
+        departmentService.createDeptMut();
+        return new Result(ResultCode.SUCCESS);
     }
 
     @RequestMapping(value = "/department/update", method = RequestMethod.GET)
-    public String updateDepartment() throws Exception {
-        try {
-            departmentService.updateDeptMut();
-            return "ok";
-        } catch (Exception e) {
-            return "sorry";
-        }
+    public Result updateDepartment() throws Exception {
+        departmentService.updateDeptMut();
+        return new Result(ResultCode.SUCCESS);
     }
 }
