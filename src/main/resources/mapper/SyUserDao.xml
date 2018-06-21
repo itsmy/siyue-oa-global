@@ -117,7 +117,7 @@
     </select>
     <!--模拟人员信息变更-->
     <select id="getUpdateUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
-        SELECT
+     SELECT
             PERNR  AS "jobNumber",
             NACHN  AS "chName",
             STAT2  AS "status",
@@ -131,13 +131,13 @@
             ORGEH  AS "departmentId",
             STEXT  AS "departmentName",
             PLSTX AS "position"
-        FROM dbo.T011 AS t1
-        WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
-              AND EXISTS(SELECT PERNR
-                         FROM dbo.T011
-                         WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
-                               AND PERNR = t1.PERNR
-                               AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH))
+            FROM dbo.T011 AS t1
+            WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
+            AND EXISTS(SELECT PERNR
+            FROM dbo.T011
+            WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
+            AND PERNR = t1.PERNR
+            AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH OR PLSTX &lt;&gt; t1.PLSTX))
     </select>
     <select id="getAllUserIdList" resultType="java.math.BigDecimal">
         SELECT

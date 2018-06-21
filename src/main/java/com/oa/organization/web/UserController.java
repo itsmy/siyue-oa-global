@@ -1,7 +1,10 @@
 package com.oa.organization.web;
 
+import com.oa.common.enums.ResultCode;
 import com.oa.common.util.AuthUtil;
 import com.oa.common.util.DateUtil;
+import com.oa.common.vo.Result;
+import com.oa.organization.entity.SyUser;
 import com.oa.organization.service.SyDepartmentService;
 import com.oa.organization.service.SyUserService;
 import com.oa.organization.service.SyncLogService;
@@ -9,11 +12,11 @@ import com.oa.organization.service.impl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/organization")
@@ -33,13 +36,12 @@ public class UserController {
      * @throws Exception
      */
     @RequestMapping(value = "/user/create", method = RequestMethod.GET)
-    public String createUser() throws Exception {
+    public Result createUser() throws Exception {
         try {
             userService.createUserMut();
-            return "success";
+            return new Result(ResultCode.SUCCESS);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return "error";
+            return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
         }
     }
 
@@ -50,12 +52,12 @@ public class UserController {
      * @throws Exception
      */
     @RequestMapping(value = "/user/update", method = RequestMethod.GET)
-    public String updateUser() throws Exception {
+    public Result updateUser() throws Exception {
         try {
             syncLogService.insertLog();
             userService.updateUserMut(1);
             syncLogService.updateLog("S");
-            return "success";
+            return new Result(ResultCode.SUCCESS);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             /*异常情况需要获取最后一次更新成功的时间*/
@@ -66,16 +68,19 @@ public class UserController {
                 int differ = DateUtil.dateDiffer(recordDate, nowDate);
                 userService.updateUserMut(differ);
                 syncLogService.updateLog("S");
-                return "success";
+                return new Result(ResultCode.SUCCESS);
             }
-            return "error";
+            return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
         }
     }
 
-    /*    *//**
+    /*    */
+
+    /**
      * 登录,成功后反回人员组织架构的信息
-     * @param jsonObject
-     * @param httpServletRequest
+     *
+     * @param
+     * @param
      * @return
      *//*
     @RequestMapping(value = "/user/login",method = RequestMethod.POST)
@@ -98,5 +103,16 @@ public class UserController {
             e.getMessage();
         }
         return json;
+    }*/
+/*    @GetMapping("/user/login")
+    public Map<String, String> login() {
+        Map<String, String> hashMap = new HashMap<>();
+        hashMap.put("msg", "登录成功");
+        return hashMap;
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public Result loginNp() {
+        return new Result(ResultCode.SUCCESS);
     }*/
 }

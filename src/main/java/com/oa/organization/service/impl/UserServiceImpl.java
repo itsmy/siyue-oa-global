@@ -261,6 +261,7 @@ public class UserServiceImpl implements UserService {
                         dingTalkUser.setName(user.getChName());
                         dingTalkUser.setEmail(user.getOfficeEmail());
                         dingTalkUser.setDepartment(departmentIdList);
+                        dingTalkUser.setPosition(user.getPosition());
                         //调用钉钉员工接口
                         updateUser(accessToken, dingTalkUser);
                         //Thread.sleep(60);

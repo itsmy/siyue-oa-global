@@ -167,6 +167,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             if (deptRecord != null) {
                 /*要删除的部门id*/
                 long dingTalkId = Long.parseLong(deptRecord.getDdId());
+                //如果要删除的部门不再钉钉中，则不删除
                 int exist = isExist(accessToken, String.valueOf(dingTalkId));
                 if (exist > 0) {
                     /*4.删除部门d*/

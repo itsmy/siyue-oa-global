@@ -38,7 +38,7 @@
         FROM
         DEP
         WHERE
-        SEND_DATE='2018-05-22 00:00:00.000'
+        SEND_DATE='2018-06-12 00:00:00.000'
         AND
         OBJID &lt;&gt; '00000001'
     </select>
@@ -63,7 +63,7 @@
         FROM
         DEP
         WHERE
-        SEND_DATE='2018-05-22 00:00:00.000'
+        SEND_DATE='2018-06-12 00:00:00.000'
         AND
         OBJID &lt;&gt; '00000001'
     </select>
@@ -90,7 +90,7 @@
         FROM
             DEP
         WHERE
-            SEND_DATE='2018-05-22 00:00:00.000'
+            SEND_DATE='2018-06-12 00:00:00.000'
         AND
             OBJID &lt;&gt; #{fatherDeptId}
     </select>
@@ -111,7 +111,7 @@
             LTEXT    AS "primeCentName",
             BEGDA    AS "beginDate",
             ENDDA    AS "endDate"
-        FROM T012 WHERE ZP_OBJID = #{fatherDeptId} AND SEND_DATE='2018-05-22 00:00:00.000'
+        FROM T012 WHERE ZP_OBJID = #{fatherDeptId} AND SEND_DATE='2018-06-12 00:00:00.000'
     </select>
     <!-- 根据部门id获取部门信息-->
     <select id="getDeptById" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.SyDepartment">
@@ -129,7 +129,7 @@
             LTEXT    AS "primeCentName",
             BEGDA    AS "beginDate",
             ENDDA    AS "endDate"
-        FROM T012 WHERE OBJID = #{departmentId} AND SEND_DATE='2018-05-22 00:00:00.000'
+        FROM T012 WHERE OBJID = #{departmentId} AND SEND_DATE='2018-06-12 00:00:00.000'
     </select>
     <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
     <update id="updateDeptById" parameterType="java.util.HashMap">
