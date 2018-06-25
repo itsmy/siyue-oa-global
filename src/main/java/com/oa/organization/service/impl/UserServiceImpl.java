@@ -1,17 +1,15 @@
 package com.oa.organization.service.impl;
 
 import com.dingtalk.open.client.api.model.corp.*;
+import com.oa.organization.entity.SyDepartment;
 import com.oa.organization.entity.UserRecord;
 import com.oa.organization.exception.OApiException;
-import com.oa.organization.service.UserRecordService;
-import com.oa.organization.service.UserService;
+import com.oa.organization.service.*;
 import com.alibaba.fastjson.JSONObject;
 import com.dingtalk.open.client.ServiceFactory;
 import com.dingtalk.open.client.api.service.corp.CorpUserService;
 import com.oa.organization.entity.DeptRecord;
 import com.oa.organization.entity.SyUser;
-import com.oa.organization.service.DeptRecordService;
-import com.oa.organization.service.SyUserService;
 import com.oa.common.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,6 +316,7 @@ public class UserServiceImpl implements UserService {
             userDetail.setMobile(mobile);
             return userDetail;
         }
+        logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + user.getJobNumber().toString() + "’s mobile is invalid !!!");
         return null;
     }
 
@@ -374,78 +373,9 @@ public class UserServiceImpl implements UserService {
         }
         return token;
     }
-    /*
-     *//*成员更新异常时调用次接口*//*
-    public boolean reUpdateUsers(String accessToken) throws Exception {
-        try {
-            List<SyUser> userList = syUserService.getUserList();
-            List<BigDecimal> userRecordIdList = userRecordService.getAllUserIdList();
-            for (int i = 0; i < userList.size(); i++) {
-                SyUser user = userList.get(i);
-                BigDecimal userId = user.getJobNumber();
-                if (!userRecordIdList.contains(userId)) {
-                    *//*创建成员*//*
-                    BigDecimal departmentId = user.getDepartmentId();
-                    DeptRecord deptRecord = deptRecordService.getDept(departmentId);
-                    String ddId = deptRecord.getDdId();
-                    CorpUserDetail corpUserDetail = setUserDetail(user, ddId);
-                    createUser(accessToken, corpUserDetail);
-                    UserRecord userRecord = new UserRecord();
-                    userRecord.setJobNumber(user.getJobNumber());
-                    userRecord.setChName(user.getChName());
-                    userRecord.setPersonalMobile(user.getPersonalMobile());
-                    userRecord.setOfficeMobile(user.getOfficeMobile());
-                    userRecord.setOfficeTelephone(user.getOfficeTelephone());
-                    userRecord.setOfficeAddress(user.getOfficeAddress());
-                    userRecord.setPersonalEmail(user.getPersonalEmail());
-                    userRecord.setOfficeEmail(user.getOfficeEmail());
-                    userRecord.setErDeptId(user.getDepartmentId());
-                    userRecord.setDepartmentName(user.getDepartmentName());
-                    userRecord.setPosition(user.getPosition());
-                    *//*更新记录表*//*
-                    userRecordService.createUser(userRecord);
-                }
-            }
-            *//*删除成员*//*
-            List<BigDecimal> userIdList = syUserService.getAllUserIdList();
-            for (int i = 0; i < userRecordIdList.size(); i++) {
-                BigDecimal recordId = userRecordIdList.get(i);
-                if (!userIdList.contains(recordId)) {
-                    deleteUser(accessToken, String.valueOf(recordId));
-                    userRecordService.deleteUser(String.valueOf(recordId));
-                }
-            }
-            *//*更改成员*//*
-            List<UserRecord> userRecordList = userRecordService.getAllUserList();
-            for (int i = 0; i < userRecordList.size(); i++) {
-                UserRecord userRecord = userRecordList.get(i);
-                BigDecimal userIdRecord = userRecord.getJobNumber();
-                for (int j = 0; j < userList.size(); j++) {
-                    SyUser user = userList.get(j);
-                    BigDecimal userId = user.getJobNumber();
-                    if (userIdRecord.equals(userId) && (!userRecord.getChName().equals(user.getChName()) || !userRecord.getOfficeEmail()
-                            .equalsIgnoreCase(user.getOfficeEmail()) || !userRecord.getErDeptId().equals(user.getDepartmentId()))) {
-                        CorpUserDetail dingTalkUser = getUser(accessToken, user.getJobNumber().toString());
-                        dingTalkUser.setName(user.getChName());
-                        dingTalkUser.setEmail(user.getOfficeEmail());
-                        List<Long> departmentIdList = new ArrayList<Long>();
-                        long departmentId = Long.parseLong(user.getDepartmentId().toString());
-                        departmentIdList.add(departmentId);
-                        dingTalkUser.setDepartment(departmentIdList);
-                        //调用钉钉员工接口
-                        updateUser(accessToken, dingTalkUser);
-                        userRecord.setChName(user.getChName());
-                        userRecord.setErDeptId(user.getDepartmentId());
-                        userRecord.setOfficeEmail(user.getOfficeEmail());
-                        userRecordService.updateUser(userRecord);
-                    }
-                }
 
-            }
-            return true;
-        } catch (Exception e) {
-            *//*这里需要返回特定的异常*//*
-            throw new Exception("please contacts administrator !");
-        }
-    }*/
+    @Override
+    public int compareUser() throws Exception {
+        return 0;
+    }
 }
