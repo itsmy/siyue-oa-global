@@ -136,7 +136,6 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     public void updateUserMut(int dateDiffer) throws Exception {
-        System.out.println("......Entering.....updateUserMut().......");
         List<DeptRecord> deptRecordList = deptRecordService.getDeptList();
         addUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
         updateUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);

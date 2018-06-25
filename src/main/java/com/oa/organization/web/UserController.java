@@ -1,22 +1,12 @@
 package com.oa.organization.web;
 
 import com.oa.common.enums.ResultCode;
-import com.oa.common.util.AuthUtil;
-import com.oa.common.util.DateUtil;
 import com.oa.common.vo.Result;
-import com.oa.organization.entity.SyUser;
-import com.oa.organization.service.SyDepartmentService;
-import com.oa.organization.service.SyUserService;
-import com.oa.organization.service.SyncLogService;
 import com.oa.organization.service.impl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/organization")
@@ -33,12 +23,15 @@ public class UserController {
      */
     @RequestMapping(value = "/user/create", method = RequestMethod.GET)
     public Result createUser() throws Exception {
+        logger.info("Entering...updateUser....................................");
         try {
             userService.createUserMut();
             return new Result(ResultCode.SUCCESS);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
+        } finally {
+            logger.info("existing...updateUser....................................");
         }
     }
 
@@ -50,12 +43,15 @@ public class UserController {
      */
     @RequestMapping(value = "/user/update", method = RequestMethod.GET)
     public Result updateUser() throws Exception {
+        logger.info("Entering...updateUser....................................");
         try {
             userService.updateUserMut(1);
             return new Result(ResultCode.SUCCESS);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
+        } finally {
+            logger.info("Existing...updateUser......................................");
         }
     }
 

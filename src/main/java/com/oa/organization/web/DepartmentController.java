@@ -20,13 +20,29 @@ public class DepartmentController {
     //为了方便测试先写全部写成get接口
     @RequestMapping(value = "/department/create", method = RequestMethod.GET)
     public Result createDepartment() throws Exception {
-        departmentService.createDeptMut();
-        return new Result(ResultCode.SUCCESS);
+        logger.info("Entering...createDepartment....................................");
+        try {
+            departmentService.createDeptMut();
+            return new Result(ResultCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
+        } finally {
+            logger.info("Existing...createDepartment....................................");
+        }
     }
 
     @RequestMapping(value = "/department/update", method = RequestMethod.GET)
     public Result updateDepartment() throws Exception {
-        departmentService.updateDeptMut();
-        return new Result(ResultCode.SUCCESS);
+        logger.info("Entering...updateDepartment....................................");
+        try {
+            departmentService.updateDeptMut();
+            return new Result(ResultCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
+        } finally {
+            logger.info("Existing...updateDepartment....................................");
+        }
     }
 }

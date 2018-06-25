@@ -4,47 +4,41 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0"
          metadata-complete="true">
-  <!--用maven创建的web-app需要修改servlet的版本为3.1-->
-  <!-- 配置DispatcherServlet,springMVC的核心是DispatcherServlet,使用springMVC的第一步就是将下面的servlet放入web.xml,servlet-name非常重要
-  默认情况下，DispatcherServlet会加载这个名字-servlet.xml,也是在WEB-INFO目录下，如果制定了init-param则会加载制定的文件-->
-  <!--加载自动执行任务-->
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>classpath:spring/spring-*.xml</param-value>
-  </context-param>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring/spring-*.xml</param-value>
+    </context-param>
 
-  <servlet>
-    <servlet-name>dispatcher</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <!-- 配置springMVC需要加载的配置文件-->
-    <!-- spring-dao.xml,spring-service.xml,spring-web.xml
-    Mybatis ->spring ->springMVC -->
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>classpath:spring/spring-*.xml</param-value>
-    </init-param>
-  </servlet>
-  <!-- 静态资源不拦截-->
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.html</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>dispatcher</servlet-name>
-    <!-- 默认匹配所有的请求-->
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
-  <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
-  <!--    <welcome-file-list>
-          &lt;!&ndash;<welcome-file>index.html</welcome-file>&ndash;&gt;
-          <welcome-file>index.jsp</welcome-file>
-          <welcome-file>login.html</welcome-file>
-          <welcome-file>login.jsp</welcome-file>
-      </welcome-file-list>-->
-  <!-- 设置全局session过期时间为30s，由于有自动更新的任务，所以不能设置全局session 过期时间-->
-  <!--    <session-config>
-          <session-timeout>30</session-timeout>
-      </session-config>-->
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- 配置springMVC需要加载的配置文件-->
+        <!-- spring-dao.xml,spring-service.xml,spring-web.xml
+        Mybatis ->spring ->springMVC -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:spring/spring-*.xml</param-value>
+        </init-param>
+    </servlet>
+    <!-- 静态资源不拦截-->
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <!-- 默认匹配所有的请求-->
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <!-- 添加日志监听器-->
+    <context-param>
+        <param-name>logbackConfigLocation</param-name>
+        <param-value>classpath:logback.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>ch.qos.logback.ext.spring.web.LogbackConfigListener</listener-class>
+    </listener>
 </web-app>

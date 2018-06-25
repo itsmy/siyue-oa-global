@@ -101,7 +101,6 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @throws Exception
      */
     public void updateDeptMut() throws Exception {
-        System.out.println("......Entering.....updateDeptMut().......");
         addDepartment(AuthUtil.getAccessToken());
         updateDepartment(AuthUtil.getAccessToken());
         delDepartment(AuthUtil.getAccessToken());
