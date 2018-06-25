@@ -23,11 +23,7 @@ import java.util.Map;
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
-    private SyDepartmentService syDepartmentService;
-    @Autowired
     private UserServiceImpl userService;
-    @Autowired
-    private SyncLogService syncLogService;
 
     /**
      * 创建用户
@@ -41,6 +37,7 @@ public class UserController {
             userService.createUserMut();
             return new Result(ResultCode.SUCCESS);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
         }
     }
@@ -54,22 +51,10 @@ public class UserController {
     @RequestMapping(value = "/user/update", method = RequestMethod.GET)
     public Result updateUser() throws Exception {
         try {
-            syncLogService.insertLog();
             userService.updateUserMut(1);
-            syncLogService.updateLog("S");
             return new Result(ResultCode.SUCCESS);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            /*异常情况需要获取最后一次更新成功的时间*/
-            syncLogService.insertLog();
-            Date recordDate = syncLogService.getLatestSuccessLog();
-            if (recordDate != null) {
-                Date nowDate = new Date();
-                int differ = DateUtil.dateDiffer(recordDate, nowDate);
-                userService.updateUserMut(differ);
-                syncLogService.updateLog("S");
-                return new Result(ResultCode.SUCCESS);
-            }
             return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
         }
     }

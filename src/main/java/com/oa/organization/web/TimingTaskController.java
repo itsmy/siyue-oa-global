@@ -1,6 +1,7 @@
 package com.oa.organization.web;
 
 import com.oa.common.util.DateUtil;
+import com.oa.organization.service.ChatGroupService;
 import com.oa.organization.service.DepartmentService;
 import com.oa.organization.service.SyncLogService;
 import com.oa.organization.service.UserService;
@@ -25,6 +26,8 @@ public class TimingTaskController {
     @Autowired
     private UserService userService;
     @Autowired
+    private ChatGroupService chatGroupService;
+    @Autowired
     private SyncLogService syncLogService;
 
     /**
@@ -32,15 +35,16 @@ public class TimingTaskController {
      *
      * @throws Exception
      */
-    @Scheduled(cron = "0 0 12 * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void timingUpdate() throws Exception {
+        departmentService.updateDeptMut();
         logger.info("定时任务启动+++++++++++++++++++++A方案+++++++++++++++++++++++++++++++++");
         try {
             /*开始之前，标记状态为F*/
             syncLogService.insertLog();
-            departmentService.updateDeptMut();
             userService.updateUserMut(1);
             syncLogService.updateLog("S");
+            chatGroupService.updateChatGroupMut();
         } catch (Exception e) {
             logger.info("定时任务启动+++++++++++++++++++++B方案+++++++++++++++++++++++");
             e.getMessage();

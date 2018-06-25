@@ -131,7 +131,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 int exist = isExist(accessToken, dingTalkParentId);
                 if (exist > 0) {
                     /*这里调用的是钉钉的创建部门的接口,创建部门需要传入父部门id的*/
-                    String deptBackId = createDepartment(accessToken, syDepartmentName, dingTalkParentId, "", false);
+                    String deptBackId = createDepartment(accessToken, syDepartmentName, dingTalkParentId, "", true);
                     //Thread.sleep(60);
                     /*将新增加的部门同步到中间表*/
                     DeptRecord deptRecord = new DeptRecord();
@@ -142,6 +142,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                     deptRecord.setCompanyId(syDepartment.getCompanyId());
                     deptRecord.setCompanyName(syDepartment.getCompanyName());
                     result = result + deptRecordService.insertDept(deptRecord);
+                    logger.info("create department+++++++++++++++++++++++++++++++++++++++" + syDepartmentName);
                 }
                 //deptRecordList.add(deptRecord);
                 continue;
@@ -172,7 +173,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                 if (exist > 0) {
                     /*4.删除部门d*/
                     deleteDepartment(accessToken, dingTalkId);
-                    //Thread.sleep(60);
+                    Thread.sleep(60);
+                    logger.info("delete department++++++++++++++++++++++++++++++++++++++" + syDepartmentId);
                 }
                 /*删除中间表中的记录表*/
                 deptRecordService.deleteDept(syDepartmentId);
@@ -203,9 +205,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             if (exist > 0) {
                 updateDepartment(accessToken, dingTalkDeptId, departmentName, parentId, "",
                         false, false, "", false, "", "", false, "", "", "");
-                //Thread.sleep(60);
+                Thread.sleep(60);
                 /*更新中间表中的部门*/
                 deptRecordService.updateDept(syDepartmentId, syDeptParentId, departmentName);
+                logger.info("department update+++++++++++++++++++++++++++++++" + departmentName);
             }
             continue;
         }
@@ -267,6 +270,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 targetDeptList.add(deptRecord);
                 /*递归*/
                 createDept(accessToken, deptId);
+                logger.info("create department++++++++++++++++++++++++++++" + departmentName);
             }
         } catch (Exception e) {
             logger.error("departmentName============" + departmentName + "++++++++++++++" + parentId);
@@ -282,6 +286,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
             return 0;
         } catch (Exception e) {
+            //logger.error(e.getMessage(), e);
             return -1;
         }
     }

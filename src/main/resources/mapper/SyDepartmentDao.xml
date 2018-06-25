@@ -5,7 +5,7 @@
 
 <mapper namespace="com.oa.organization.dao.SyDepartmentDao">
     <!-- 获取所有部门-->
-    <select id="getDepartmentList" resultType="com.oa.organization.entity.SyDepartment">
+    <select id="getDepartmentList" resultType="com.oa.organization.entity.SyDepartment" flushCache="true">
         WITH DEP AS (
         SELECT
         OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
@@ -38,22 +38,22 @@
         FROM
         DEP
         WHERE
-        SEND_DATE='2018-06-12 00:00:00.000'
+        SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND SEND_DATE &lt;= ENDDA
         AND
         OBJID &lt;&gt; '00000001'
     </select>
     <!-- 查询所有的部门id-->
-    <select id="getDeptIdList" resultType="java.math.BigDecimal">
+    <select id="getDeptIdList" resultType="java.math.BigDecimal" flushCache="true">
         WITH DEP AS (
         SELECT
-        OBJID,SEND_DATE
+        OBJID,SEND_DATE,ENDDA
         FROM
         dbo.T012
         WHERE
         OBJID = '00000001'
         UNION ALL
         SELECT
-        T012.OBJID,T012.SEND_DATE
+        T012.OBJID,T012.SEND_DATE,T012.ENDDA
         FROM
         DEP,T012
         WHERE
@@ -63,13 +63,13 @@
         FROM
         DEP
         WHERE
-        SEND_DATE='2018-06-12 00:00:00.000'
+        SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND SEND_DATE &lt;= ENDDA
         AND
         OBJID &lt;&gt; '00000001'
     </select>
     <!-- 查询某个部门下的所有子部门，含递归-->
     <select id="getSubDeptListByFatherId" parameterType="java.math.BigDecimal"
-            resultType="com.oa.organization.entity.SyDepartment">
+            resultType="com.oa.organization.entity.SyDepartment" flushCache="true">
         WITH DEP AS (
             SELECT
                 OBJID,STEXT,ZP_OBJID,ZP_STEXT,ZC_OBJID,ZC_STEXT,PERNR,NACHN,Z_BMCJ,KOSTL,LTEXT,BEGDA,ENDDA,SEND_DATE
@@ -90,13 +90,13 @@
         FROM
             DEP
         WHERE
-            SEND_DATE='2018-06-12 00:00:00.000'
+            SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND SEND_DATE &lt;= ENDDA
         AND
             OBJID &lt;&gt; #{fatherDeptId}
     </select>
     <!--根据父部门id查询子部门 -->
     <select id="getDeptListByFatherId" parameterType="java.math.BigDecimal"
-            resultType="com.oa.organization.entity.SyDepartment">
+            resultType="com.oa.organization.entity.SyDepartment" flushCache="true">
         SELECT
             OBJID    AS "departmentId",
             STEXT    AS "departmentName",
@@ -111,10 +111,11 @@
             LTEXT    AS "primeCentName",
             BEGDA    AS "beginDate",
             ENDDA    AS "endDate"
-        FROM T012 WHERE ZP_OBJID = #{fatherDeptId} AND SEND_DATE='2018-06-12 00:00:00.000'
+        FROM T012 WHERE ZP_OBJID = #{fatherDeptId}
+        AND SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND SEND_DATE &lt;= ENDDA
     </select>
     <!-- 根据部门id获取部门信息-->
-    <select id="getDeptById" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.SyDepartment">
+    <select id="getDeptById" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.SyDepartment" flushCache="true">
         SELECT
             OBJID    AS "departmentId",
             STEXT    AS "departmentName",
@@ -129,7 +130,7 @@
             LTEXT    AS "primeCentName",
             BEGDA    AS "beginDate",
             ENDDA    AS "endDate"
-        FROM T012 WHERE OBJID = #{departmentId} AND SEND_DATE='2018-06-12 00:00:00.000'
+        FROM T012 WHERE OBJID = #{departmentId}
     </select>
     <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
     <update id="updateDeptById" parameterType="java.util.HashMap">

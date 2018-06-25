@@ -4,9 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.oa.organization.dao.SyUserDao">
     <!-- 目的:为DAO接口方法提供sql语句配置-->
-    <select id="getUserList" resultType="com.oa.organization.entity.SyUser">
-        /*排除掉三个管理员组的成员*/
-    SELECT
+    <!--需要排除管理员,关闭所有的一级缓存flushCache="true"-->
+    <select id="getUserList" resultType="com.oa.organization.entity.SyUser" flushCache="true">
+      SELECT
         PERNR  AS "jobNumber",
             NACHN  AS "chName",
             STAT2  AS "status",
@@ -23,24 +23,104 @@
         FROM
         T011
         WHERE
-        ORGEH IN ('00010551',
-        '00000291','00000361','00000362','00000363','00010025','00000378','00001264',
-        '00000511','00000563','00000564',
-        '00000608','00010331','00010332','00010319','00010317',
-        '00000709','00000736','00000737',
-        '00000815','00000837','00000838',
-        '00000915','00000927','00000928',
-        '00001009','00010817','00010818',
-        '00001108','00001132','00001133',
-        '00001215','00001233','00001234',
-        '00001313','00001329','00001330',
-        '00010085','00001510',
-        '00010786'
-        ) AND STAT2 IN('0','1','2')AND  SEND_DATE = '2018-05-22 00:00:00.000' AND PERNR&lt;&gt;'110175'
+        ORGEH IN ('00000020',
+            '00010281',
+            '00000261',
+            '00000201',
+            '00000211',
+            '00000221',
+            '00000251',
+            '00000271',
+            '00000281',
+            '00000291',
+            '00000301',
+            '00000311',
+            '00000321',
+            '00000341',
+            '00000384',
+            '00010825',
+            '00010175',
+            '00000369',
+            '00000380',
+            '00000381',
+            '00000382',
+            '00000383',
+            '00010805',
+            '00010076',
+            '00010384',
+            '00010386',
+            '00010387',
+            '00010388',
+            '00010389',
+            '00010385',
+            '00010124',
+            '00010127',
+            '00010128',
+            '00010129',
+            '00010130',
+            '00000368',
+            '00010134',
+            '00010133',
+            '00010132',
+            '00010131',
+            '00010125',
+            '00000373',
+            '00000374',
+            '00000375',
+            '00000376',
+            '00000377',
+            '00001231',
+            '00001232',
+            '00000361',
+            '00000362',
+            '00000363',
+            '00010025',
+            '00000378',
+            '00001264',
+            '00000359',
+            '00000360',
+            '00000371',
+            '00000372',
+            '00010405',
+            '00000356',
+            '00000357',
+            '00000358',
+            '00010810',
+            '00010811',
+            '00010629',
+            '00010630',
+            '00010631',
+            '00010632',
+            '00010634',
+            '00010635',
+            '00010636',
+            '00010637',
+            '00010638',
+            '00010640',
+            '00010641',
+            '00010642',
+            '00010643',
+            '00010420',
+            '00010422',
+            '00010424',
+            '00010426',
+            '00010428',
+            '00010430',
+            '00010432',
+            '00010480',
+            '00010601',
+            '00010626',
+            '00010602',
+            '00010617',
+            '00010813',
+            '00010814',
+            '00010815'
+        ) AND STAT2 IN('0','1','2')AND  SEND_DATE =  CONVERT (VARCHAR(10), GETDATE(), 120)
+        AND PERSK &lt;&gt;'40' AND PERNR &lt;&gt; '110175' AND PERNR &lt;&gt; '202754' AND PERNR &lt;&gt; '120822' AND PERNR &lt;&gt; '111672'
     </select>
     <!-- 根据部门id查询部门下的成员-->
     <select id="getUserListByDeptId" parameterType="java.math.BigDecimal"
-            resultType="com.oa.organization.entity.SyUser">
+            resultType="com.oa.organization.entity.SyUser" flushCache="true">
         SELECT
             PERNR  AS "jobNumber",
             NACHN  AS "chName",
@@ -56,14 +136,14 @@
             STEXT  AS "departmentName",
             PLSTX AS "position"
         FROM T011 WHERE ORGEH = #{deptId} AND STAT2 IN('0','1','2')
-              AND SEND_DATE = '2018-05-22 00:00:00'
+              AND SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND PERSK &lt;&gt;'40'
     </select>
-    <!-- 模拟测试新增加的手机号码的功能,新增人员,新增人员以办公手机为准-->
-    <select id="getNewUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
-        /*select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
-        DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and not exists (select PERNR from dbo.T011 where
-        DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR)
-        */
+    <!-- 新增人员-->
+    <!--select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
+    DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and not exists (select PERNR from dbo.T011 where
+    DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR)-->
+    <select id="getNewUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser"
+            flushCache="true">
         SELECT
             PERNR  AS "jobNumber",
             NACHN  AS "chName",
@@ -79,19 +159,19 @@
             STEXT  AS "departmentName",
             PLSTX AS "position"
         FROM dbo.T011 AS t1
-        WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
-              AND EXISTS(SELECT Z_BGSJ
+        WHERE DATEDIFF(DY, SEND_DATE, GETDATE()) = 0
+              AND NOT EXISTS(SELECT Z_BGSJ
                          FROM dbo.T011
-                         WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
-                               AND PERNR = t1.PERNR
-                               AND Z_BGSJ = ''
-                               AND Z_BGSJ &lt;&gt; t1.Z_BGSJ)
+                         WHERE DATEDIFF(DY, SEND_DATE, GETDATE()) = #{dateDiffer}
+                               AND PERNR = t1.PERNR)
+                               AND PERSK &lt;&gt;'40'
     </select>
-    <!--模拟测试人员离职的功能 -->
-    <select id="getLeaveUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
-        /*select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
-        DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and STAT2 = 5 and exists (select STAT2 from dbo.T011 where
-        DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR and STAT2 &lt;&gt; t1.STAT2)*/
+    <!--离职人员 -->
+    <!--select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
+    DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and STAT2 = 5 and exists (select STAT2 from dbo.T011 where
+    DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR and STAT2 &lt;&gt; t1.STAT2)-->
+    <select id="getLeaveUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser"
+            flushCache="true">
         SELECT
             PERNR  AS "jobNumber",
             NACHN  AS "chName",
@@ -107,17 +187,13 @@
             STEXT  AS "departmentName",
             PLSTX AS "position"
         FROM dbo.T011 AS t1
-        WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
-              AND STAT2 IN ('4','5')
-              AND EXISTS(SELECT STAT2
-                         FROM dbo.T011
-                         WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
-                               AND PERNR = t1.PERNR
-                               AND STAT2 &lt;&gt; t1.STAT2)
+        WHERE STAT2 IN ('4','5') AND PERSK &lt;&gt;'40'
+        AND SEND_DATE=CONVERT (VARCHAR(10), GETDATE(), 120)
     </select>
-    <!--模拟人员信息变更-->
-    <select id="getUpdateUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser">
-     SELECT
+    <!--人员信息变更-->
+    <select id="getUpdateUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser"
+            flushCache="true">
+        SELECT
             PERNR  AS "jobNumber",
             NACHN  AS "chName",
             STAT2  AS "status",
@@ -131,23 +207,25 @@
             ORGEH  AS "departmentId",
             STEXT  AS "departmentName",
             PLSTX AS "position"
-            FROM dbo.T011 AS t1
-            WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = 0
-            AND EXISTS(SELECT PERNR
-            FROM dbo.T011
-            WHERE DATEDIFF(DY, SEND_DATE, '2018-05-22 00:00:00.000') = #{dateDiffer}
-            AND PERNR = t1.PERNR
-            AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH OR PLSTX &lt;&gt; t1.PLSTX))
+        FROM dbo.T011 AS t1
+        WHERE DATEDIFF(DY, SEND_DATE, GETDATE()) = 0
+              AND EXISTS(SELECT PERNR
+                         FROM dbo.T011
+                         WHERE DATEDIFF(DY, SEND_DATE, GETDATE()) = #{dateDiffer}
+                               AND PERNR = t1.PERNR
+                               AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH OR PLSTX &lt;&gt; t1.PLSTX OR Z_BGSJ &lt;&gt; t1.Z_BGSJ))
+                               AND PERSK &lt;&gt;'40'
+                               AND STAT2 IN('0','1','2')
     </select>
-    <select id="getAllUserIdList" resultType="java.math.BigDecimal">
+    <select id="getAllUserIdList" resultType="java.math.BigDecimal" flushCache="true">
         SELECT
             PERNR  AS "jobNumber"
         FROM T011
         WHERE STAT2 IN('0','1','2')
-              AND SEND_DATE = '2018-05-22 00:00:00'
+              AND SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND PERSK &lt;&gt;'40'
     </select>
     <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
-    <update id="updateUser" parameterType="java.util.HashMap">
+    <update id="updateUser" parameterType="java.util.HashMap" >
         UPDATE T011
         SET
             NACHN = #{chName},

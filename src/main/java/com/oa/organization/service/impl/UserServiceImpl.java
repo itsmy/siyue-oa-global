@@ -200,7 +200,8 @@ public class UserServiceImpl implements UserService {
                         /*erp中人员的手机号码是否为空*/
                         if (userDetail != null) {
                             createUser(accessToken, userDetail);
-                            //Thread.sleep(60);
+                            Thread.sleep(60);
+                            logger.info("create users++++++++++++++++++++++++++++++++++++++" + user.getChName());
                         }
                     }
                 }
@@ -210,7 +211,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 批量删除user,离职人员某天的数量超过100个被认为是数据异常
+     * 批量删除user,离职人员某天的数量超过1000个被认为是数据异常,正常情况是100个到300个之间
      *
      * @param accessToken
      * @param deptRecordList
@@ -218,7 +219,7 @@ public class UserServiceImpl implements UserService {
      */
     private void deleteUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
         List<SyUser> leaveUserList = syUserService.getLeaveUserList(dateDiffer);
-        for (int j = 0; leaveUserList.size() < 100 && j < leaveUserList.size(); j++) {
+        for (int j = 0; leaveUserList.size() < 1000 && j < leaveUserList.size(); j++) {
             SyUser user = leaveUserList.get(j);
             /*删除的人员必须存在于钉钉组织架构中，并且需要在记录表中*/
             int exist = isExist(accessToken, String.valueOf(user.getJobNumber()));
@@ -229,7 +230,8 @@ public class UserServiceImpl implements UserService {
                     if (deptErpId.equals(user.getDepartmentId())) {
                         String userId = user.getJobNumber().toString();
                         deleteUser(accessToken, userId);
-                        //Thread.sleep(60);
+                        Thread.sleep(60);
+                        logger.info("delete users ++++++++++++++++++" + user.getChName());
                     }
                 }
             }
@@ -238,7 +240,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 批量修改,这里不对手机号码做更改
+     * 批量修改,人员信息发生了变化,如果该员工不在钉钉中且手机号码非空真实，则调用创建员工的接口，如果该员工在钉钉中，则更新
      *
      * @param accessToken
      * @param deptRecordList
@@ -247,14 +249,13 @@ public class UserServiceImpl implements UserService {
         List<SyUser> updateUserList = syUserService.getUpdateUserList(dateDiffer);
         for (int j = 0; updateUserList.size() > 0 && j < updateUserList.size(); j++) {
             SyUser user = updateUserList.get(j);
-            /*是否在钉钉中存在此账户*/
-            int exist = isExist(accessToken, String.valueOf(user.getJobNumber()));
-            if (exist > 0) {
-                for (int i = 0; i < deptRecordList.size(); i++) {
-                    DeptRecord deptRecord = deptRecordList.get(i);
-                    BigDecimal deptErpId = deptRecord.getErpId();
-                    if (deptErpId.equals(user.getDepartmentId())) {
-                        long deptDdId = Long.parseLong(deptRecord.getDdId());
+            for (int i = 0; i < deptRecordList.size(); i++) {
+                DeptRecord deptRecord = deptRecordList.get(i);
+                BigDecimal deptErpId = deptRecord.getErpId();
+                if (deptErpId.equals(user.getDepartmentId())) {
+                    long deptDdId = Long.parseLong(deptRecord.getDdId());
+                    int exist = isExist(accessToken, String.valueOf(user.getJobNumber()));
+                    if (exist > 0) {
                         List<Long> departmentIdList = new ArrayList<Long>();
                         departmentIdList.add(deptDdId);
                         CorpUserDetail dingTalkUser = getUser(accessToken, user.getJobNumber().toString());
@@ -264,11 +265,16 @@ public class UserServiceImpl implements UserService {
                         dingTalkUser.setPosition(user.getPosition());
                         //调用钉钉员工接口
                         updateUser(accessToken, dingTalkUser);
-                        //Thread.sleep(60);
+                        Thread.sleep(60);
+                        logger.info("update user++++++++++++++++++++++++" + user.getChName());
+                    } else if (exist < 0 && !user.getOfficeMobile().equals("")) {
+                        CorpUserDetail userDetail = setUserDetail(user, String.valueOf(deptDdId));
+                        createUser(accessToken, userDetail);
+                        logger.info("add user+++++++++++++++++++++++++++++++++++" + user.getChName());
                     }
                 }
+                continue;
             }
-            continue;
         }
     }
 
@@ -278,7 +284,6 @@ public class UserServiceImpl implements UserService {
      * @param user
      */
     private CorpUserDetail setUserDetail(SyUser user, String deptBackId) {
-
         //如果人员所属的部门和记录表中的部门id相同才创建，没有就返回null
         CorpUserDetail userDetail = new CorpUserDetail();
         //主部门只有一个id,如果有多个则需要放开长度
@@ -306,9 +311,10 @@ public class UserServiceImpl implements UserService {
         userDetail.setEmail(user.getOfficeEmail().toString());
         /*职位*/
         userDetail.setPosition(user.getPosition());
-        if (mobile.equals("") || !isMobile(mobile)) {
+        /*只识别办公手机号码*/
+/*        if (mobile.equals("") || !isMobile(mobile)) {
             mobile = personalPhone;
-        }
+        }*/
         if (isMobile(mobile)) {
             userDetail.setMobile(mobile);
             return userDetail;
@@ -346,6 +352,7 @@ public class UserServiceImpl implements UserService {
             }
             return 0;
         } catch (Exception e) {
+            //logger.error("error", e);
             return -1;
         }
     }

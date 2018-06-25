@@ -25,11 +25,11 @@
         </encoder>
         <!--日志文件最大的大小-->
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>10MB</maxFileSize>
+            <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
     </appender>
 
-    <root level="error">
+    <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

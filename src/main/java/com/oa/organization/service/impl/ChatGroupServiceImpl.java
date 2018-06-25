@@ -63,13 +63,13 @@ public class ChatGroupServiceImpl implements ChatGroupService {
     public int updateChatGroup(String accessToken, long departmentId, String orgDeptOwner) throws OApiException {
         JSONObject jsonParam = new JSONObject();
         /*部门id*/
-        jsonParam.put("id", "68640060");
+        jsonParam.put("id", departmentId);
         /*开启部门群*/
         jsonParam.put("createDeptGroup", true);
         /*部门群是否包含子部门*/
         jsonParam.put("groupContainSubDept", true);
         /*部门群群主*/
-        jsonParam.put("orgDeptOwner", "203478");
+        jsonParam.put("orgDeptOwner", orgDeptOwner);
         /*调用更新部门的接口*/
         JSONObject jsonObject = updateChatGroup(accessToken, jsonParam);
         if (jsonObject != null) {

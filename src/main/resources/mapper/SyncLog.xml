@@ -4,13 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.oa.organization.dao.SyncLogDao">
     <!--查询最后一次更新失败的syncLog-->
-    <select id="getLatestFalseLog" resultType="com.oa.organization.entity.SyncLog">
+    <select id="getLatestFalseLog" resultType="com.oa.organization.entity.SyncLog" flushCache="true">
         SELECT TOP 1 ModelName,TableName,SyncDate,SyncStatu FROM SyncLog
         WHERE ModelName = 'DingTalk' AND TableName = 'T011'
         AND SyncStatu = 'F' ORDER BY SyncDate DESC
     </select>
     <!--查询最后一次更新成功的syncLog-->
-    <select id="getLatestSuccessLog" resultType="com.oa.organization.entity.SyncLog">
+    <select id="getLatestSuccessLog" resultType="com.oa.organization.entity.SyncLog" flushCache="true">
         SELECT TOP 1 ModelName,TableName,SyncDate,SyncStatu FROM SyncLog
         WHERE ModelName = 'DingTalk' AND TableName = 'T011'
         AND SyncStatu = 'S' ORDER BY SyncDate DESC

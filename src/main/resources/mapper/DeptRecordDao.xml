@@ -32,7 +32,7 @@ company_name nvarchar(40)
             erp_id = #{deptErpId}
     </update>
     <!--查询一个 -->
-    <select id="getDept" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.DeptRecord">
+    <select id="getDept" parameterType="java.math.BigDecimal" resultType="com.oa.organization.entity.DeptRecord" flushCache="true">
         SELECT
             erp_id    AS "erpId",
             dd_id     AS "ddId",
@@ -44,7 +44,7 @@ company_name nvarchar(40)
         WHERE erp_id = #{erpId}
     </select>
     <!-- 查询多个部门 -->
-    <select id="getDeptList" resultType="com.oa.organization.entity.DeptRecord">
+    <select id="getDeptList" resultType="com.oa.organization.entity.DeptRecord" flushCache="true">
         SELECT
             erp_id    AS "erpId",
             dd_id     AS "ddId",
@@ -55,7 +55,7 @@ company_name nvarchar(40)
         FROM DEPT_RECORD
     </select>
     <!-- 查询所有子部门id -->
-    <select id="getSubDeptIdByParent" resultType="java.math.BigDecimal">
+    <select id="getSubDeptIdByParent" resultType="java.math.BigDecimal" flushCache="true">
         SELECT
             erp_id    AS "erpId",
             dd_id     AS "ddId",
@@ -65,7 +65,7 @@ company_name nvarchar(40)
             company_name  AS "companyName"
         FROM DEPT_RECORD
     </select>
-    <select id="getDeptIdList" resultType="java.math.BigDecimal">
+    <select id="getDeptIdList" resultType="java.math.BigDecimal" flushCache="true">
         SELECT erp_id  AS "erpId" FROM DEPT_RECORD
     </select>
 

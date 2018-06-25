@@ -4,6 +4,8 @@ import com.oa.organization.service.DeptRecordService;
 import com.oa.organization.dao.DeptRecordDao;
 import com.oa.organization.entity.DeptRecord;
 import com.oa.organization.service.DeptRecordService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ import java.util.List;
 
 @Service
 public class DeptRecordServiceImpl implements DeptRecordService {
+    private final Logger logger = LoggerFactory.getLogger(DeptRecordServiceImpl.class);
     @Autowired
     private DeptRecordDao deptRecordDao;
 
@@ -52,9 +55,11 @@ public class DeptRecordServiceImpl implements DeptRecordService {
             for (int i = 0; i < deptList.size(); i++) {
                 DeptRecord deptRecord = deptList.get(i);
                 deptRecordDao.insertDept(deptRecord);
+                logger.info("insert deptRecord++++++++++++++++++++++++" + deptRecord.getErpName());
             }
             return 0;
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             return -1;
         }
     }
