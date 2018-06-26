@@ -1,7 +1,8 @@
-package com.oa.organization.web;
+package com.oa.organization.task;
 
 import com.oa.common.util.DateUtil;
-import com.oa.organization.service.ChatGroupService;
+import com.oa.organization.exception.OApiException;
+import com.oa.chatroup.service.ChatGroupService;
 import com.oa.organization.service.DepartmentService;
 import com.oa.organization.service.SyncLogService;
 import com.oa.organization.service.UserService;
@@ -17,26 +18,24 @@ import java.util.Date;
 /**
  * 定时任务控制类
  */
-@Component
+@Component("taskJob")
 @Lazy(false)
-public class TimingTaskController {
-    private final Logger logger = LoggerFactory.getLogger(TimingTaskController.class);
+public class OrganizationTimingTask {
+    private final Logger logger = LoggerFactory.getLogger(OrganizationTimingTask.class);
     @Autowired
     private DepartmentService departmentService;
     @Autowired
     private UserService userService;
     @Autowired
-    private ChatGroupService chatGroupService;
-    @Autowired
     private SyncLogService syncLogService;
 
     /**
-     * spring自带的timing定时任务功能实现定时更新部门和人员，每天凌晨三点进行
+     * spring自带的timing定时任务功能实现定时更新部门和人员，每天凌晨两点进行
      *
      * @throws Exception
      */
-    @Scheduled(cron = "0 0 3 * * *")
-    public void timingUpdate() throws Exception {
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void organizationUpdate() throws Exception {
         departmentService.updateDeptMut();
         logger.info(new Date() + "定时任务启动+++++++++++++++++++++A方案+++++++++++++++++++++++++++++++++");
         try {
@@ -44,7 +43,6 @@ public class TimingTaskController {
             syncLogService.insertLog();
             userService.updateUserMut(1);
             syncLogService.updateLog("S");
-            chatGroupService.updateChatGroupMut();
             logger.info(new Date() + "定时任务完成+++++++++++++++++++++A方案+++++++++++++++++++++++++++++++++");
         } catch (Exception e) {
             logger.info(new Date() + "定时任务启动+++++++++++++++++++++B方案+++++++++++++++++++++++");
