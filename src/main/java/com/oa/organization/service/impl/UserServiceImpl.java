@@ -165,6 +165,7 @@ public class UserServiceImpl implements UserService {
                         /*erp中人员的手机号码是否为空*/
                         if (userDetail != null) {
                             createUser(accessToken, userDetail);
+                            logger.info("create users++++++++++++++++++++++++++++++++++++++" + user.getChName());
                             Thread.sleep(60);
                         }
                     }
@@ -198,7 +199,7 @@ public class UserServiceImpl implements UserService {
                         if (userDetail != null) {
                             createUser(accessToken, userDetail);
                             Thread.sleep(60);
-                            logger.info("create users++++++++++++++++++++++++++++++++++++++" + user.getChName());
+                            logger.info("add users++++++++++++++++++++++++++++++++++++++" + user.getChName());
                         }
                     }
                 }
@@ -238,6 +239,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 批量修改,人员信息发生了变化,如果该员工不在钉钉中且手机号码非空真实，则调用创建员工的接口，如果该员工在钉钉中，则更新
+     * 对于手机号码一直不变的用户改更新不生效
      *
      * @param accessToken
      * @param deptRecordList
