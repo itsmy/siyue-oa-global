@@ -253,7 +253,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 String companyName = department.getCompanyName();
                 /*获得钉钉中dept的父id*/
                 String fatherId = matching(map, parentId);
-                String deptBackId = createDepartment(accessToken, departmentName, fatherId, "", false);
+                String deptBackId = createDepartment(accessToken, departmentName, fatherId, "", true);
                 /*钉钉单个接口调用频率不能超过1000次/分钟*/
                 Thread.sleep(60);
                 /*将部门id和deptBackId以键值对的形式放进map*//**/
