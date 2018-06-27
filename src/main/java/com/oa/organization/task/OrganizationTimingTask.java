@@ -18,7 +18,7 @@ import java.util.Date;
 /**
  * 定时任务控制类
  */
-@Component("taskJob")
+@Component
 @Lazy(false)
 public class OrganizationTimingTask {
     private final Logger logger = LoggerFactory.getLogger(OrganizationTimingTask.class);
@@ -34,18 +34,18 @@ public class OrganizationTimingTask {
      *
      * @throws Exception
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 20 11 * * *")
     public void organizationUpdate() throws Exception {
         departmentService.updateDeptMut();
-        logger.info(new Date() + "定时任务启动+++++++++++++++++++++A方案+++++++++++++++++++++++++++++++++");
+        logger.info(new Date() + "OrganizationTimingTask+++++++++++++++++++++START-A+++++++++++++++++++++++++++");
         try {
             /*开始之前，标记状态为F*/
             syncLogService.insertLog();
             userService.updateUserMut(1);
             syncLogService.updateLog("S");
-            logger.info(new Date() + "定时任务完成+++++++++++++++++++++A方案+++++++++++++++++++++++++++++++++");
+            logger.info(new Date() + "OrganizationTimingTask++++++++++++++++END-A+++++++++++++++++++++++++++++++++");
         } catch (Exception e) {
-            logger.info(new Date() + "定时任务启动+++++++++++++++++++++B方案+++++++++++++++++++++++");
+            logger.info(new Date() + "OrganizationTimingTask+++++++++++++++++++++START-B+++++++++++++++++++++++");
             e.getMessage();
             syncLogService.insertLog();
             /*异常情况需要获取最后一次更新成功的时间*/
@@ -55,10 +55,10 @@ public class OrganizationTimingTask {
                 int differ = DateUtil.dateDiffer(recordDate, nowDate);
                 userService.updateUserMut(differ);
                 syncLogService.updateLog("S");
-                logger.info(new Date() + "定时任务完成+++++++++++++++++++++B方案+++++++++++++++++++++++");
+                logger.info(new Date() + "OrganizationTimingTask+++++++++++END-B+++++++++++++");
             } else {
                 syncLogService.updateLog("F");
-                logger.error(new Date() + "定时任务失败+++++++++++++++++++++ALL+++++++++++++++++++++++", e.getMessage(), e);
+                logger.error(new Date() + "OrganizationTimingTask+++++++++FAILED+++++++++", e.getMessage(), e);
             }
         }
     }
