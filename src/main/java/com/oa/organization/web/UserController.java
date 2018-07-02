@@ -1,5 +1,7 @@
 package com.oa.organization.web;
 
+import com.alibaba.fastjson.JSONArray;
+import com.dingtalk.open.client.api.model.corp.CorpUserDetail;
 import com.oa.common.enums.ResultCode;
 import com.oa.common.vo.Result;
 import com.oa.organization.service.impl.UserServiceImpl;
@@ -7,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/organization")
@@ -23,16 +27,10 @@ public class UserController {
      */
     @RequestMapping(value = "/user/create", method = RequestMethod.GET)
     public Result createUser() throws Exception {
-        logger.info("Entering...updateUser....................................");
-        try {
-            userService.createUserMut();
-            return new Result(ResultCode.SUCCESS);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
-        } finally {
-            logger.info("existing...updateUser....................................");
-        }
+        logger.info("Entering...createUser....................................");
+        List<String> userIdList = userService.createUserMut();
+        logger.info("Existing...createUser....................................");
+        return new Result(ResultCode.SUCCESS, userIdList);
     }
 
     /**
@@ -44,17 +42,19 @@ public class UserController {
     @RequestMapping(value = "/user/update", method = RequestMethod.GET)
     public Result updateUser() throws Exception {
         logger.info("Entering...updateUser....................................");
-        try {
-            userService.updateUserMut(1);
-            return new Result(ResultCode.SUCCESS);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new Result(ResultCode.INTERFACE_INNER_INVOKE_ERROR);
-        } finally {
-            logger.info("Existing...updateUser......................................");
-        }
+        JSONArray updateUserArray = userService.updateUserMut(1);
+        logger.info("Existing...updateUser......................................");
+        return new Result(ResultCode.SUCCESS, updateUserArray);
+
     }
 
+    @RequestMapping(value = "/user/compare", method = RequestMethod.GET)
+    public Result compareUser() throws Exception {
+        logger.info("Entering...compareUser........................................");
+        List<CorpUserDetail> invalidUserList = userService.compareUser();
+        logger.info("Existing...compareUser........................................");
+        return new Result(ResultCode.SUCCESS, invalidUserList);
+    }
     /*    */
 
     /**

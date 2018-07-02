@@ -104,9 +104,13 @@ public interface UserService {
      */
     JSONObject getAgentUserInfo(String ssoToken, String code) throws OApiException;
 
-    void createUserMut() throws Exception;
+    List<String> createUserMut() throws Exception;
 
-    void updateUserMut(int dateDiffer) throws Exception;
+    Object updateUserMut(int dateDiffer) throws Exception;
 
-   // boolean reUpdateUsers(String accessToken) throws Exception;
+    /*不属于我们公司的人员需要清理掉*/
+    List<CorpUserDetail> compareUser() throws Exception;
+
+    // boolean reUpdateUsers(String accessToken) throws Exception;
+    int isExist(String accessToken, String userId);
 }

@@ -1,5 +1,7 @@
 package com.oa.organization.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dingtalk.open.client.api.model.corp.*;
 import com.oa.organization.service.*;
 import com.dingtalk.open.client.ServiceFactory;
@@ -100,10 +102,19 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return
      * @throws Exception
      */
-    public void updateDeptMut() throws Exception {
-        addDepartment(AuthUtil.getAccessToken());
-        updateDepartment(AuthUtil.getAccessToken());
-        delDepartment(AuthUtil.getAccessToken());
+    public JSONArray updateDeptMut() throws Exception {
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+
+        List<String> addDepartmentList = addDepartment(AuthUtil.getAccessToken());
+        List<String> updateDepartmentList = updateDepartment(AuthUtil.getAccessToken());
+        List<String> delDepartmentList = delDepartment(AuthUtil.getAccessToken());
+
+        jsonObject.put("addDepartmentList", addDepartmentList.toString());
+        jsonObject.put("updateDepartmentList", updateDepartmentList.toString());
+        jsonObject.put("delDepartmentList", delDepartmentList.toString());
+        jsonArray.add(jsonObject);
+        return jsonArray;
     }
 
     /**
@@ -112,11 +123,12 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @param accessToken
      * @return
      */
-    private int addDepartment(String accessToken) throws Exception {
+    private List<String> addDepartment(String accessToken) throws Exception {
         /*增删改查是单独进行的*/
         //CopyOnWriteArrayList<DeptRecord> deptRecordList = new CopyOnWriteArrayList();
         /*获取新增的部门的集合*/
-        int result = 0;
+        List<String> resultDeptIdList = new ArrayList<String>();
+        String resultDeptId = "";
         List<SyDepartment> newDeptList = syDepartmentService.getNewDeptList();
         for (int i = 0; newDeptList.size() > 0 && i < newDeptList.size(); i++) {
             SyDepartment syDepartment = newDeptList.get(i);
@@ -131,6 +143,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                 if (exist > 0) {
                     /*这里调用的是钉钉的创建部门的接口,创建部门需要传入父部门id的*/
                     String deptBackId = createDepartment(accessToken, syDepartmentName, dingTalkParentId, "", true);
+                    resultDeptId = deptBackId;
+                    resultDeptIdList.add(resultDeptId);
                     //Thread.sleep(60);
                     /*将新增加的部门同步到中间表*/
                     DeptRecord deptRecord = new DeptRecord();
@@ -140,14 +154,14 @@ public class DepartmentServiceImpl implements DepartmentService {
                     deptRecord.setParentId(deptParentId);
                     deptRecord.setCompanyId(syDepartment.getCompanyId());
                     deptRecord.setCompanyName(syDepartment.getCompanyName());
-                    result = result + deptRecordService.insertDept(deptRecord);
+                    deptRecordService.insertDept(deptRecord);
                     logger.info("create department+++++++++++++++++++++++++++++++++++++++" + syDepartmentName);
                 }
                 //deptRecordList.add(deptRecord);
                 continue;
             }
         }
-        return result;
+        return resultDeptIdList;
     }
 
     /**
@@ -158,7 +172,9 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @param accessToken
      * @throws Exception 异常时部门删除出错<p>
      **/
-    private void delDepartment(String accessToken) throws Exception {
+    private List<String> delDepartment(String accessToken) throws Exception {
+        List<String> resultDeptIdList = new ArrayList<String>();
+        String resultDeptId = "";
         List<BigDecimal> delDeptIdList = syDepartmentService.getDiscardDeptIdList();
         for (int i = 0; i < delDeptIdList.size(); i++) {
             BigDecimal syDepartmentId = delDeptIdList.get(i);
@@ -173,6 +189,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                     /*4.删除部门d*/
                     deleteDepartment(accessToken, dingTalkId);
                     Thread.sleep(60);
+                    resultDeptId = String.valueOf(dingTalkId);
+                    resultDeptIdList.add(resultDeptId);
                     logger.info("delete department++++++++++++++++++++++++++++++++++++++" + syDepartmentId);
                 }
                 /*删除中间表中的记录表*/
@@ -180,6 +198,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 continue;
             }
         }
+        return resultDeptIdList;
     }
 
     /**
@@ -189,7 +208,9 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return
      * @throws Exception
      */
-    private void updateDepartment(String accessToken) throws Exception {
+    private List<String> updateDepartment(String accessToken) throws Exception {
+        List<String> resultDeptIdList = new ArrayList<String>();
+        String resultDeptId = "";
         /*获取更新部门的集合*/
         List<SyDepartment> updateDeptList = syDepartmentService.getUpdateDeptList();
         for (int i = 0; updateDeptList.size() > 0 && i < updateDeptList.size(); i++) {
@@ -205,12 +226,15 @@ public class DepartmentServiceImpl implements DepartmentService {
                 updateDepartment(accessToken, dingTalkDeptId, departmentName, parentId, "",
                         false, false, "", false, "", "", false, "", "", "");
                 Thread.sleep(60);
+                resultDeptId = String.valueOf(dingTalkDeptId);
+                resultDeptIdList.add(resultDeptId);
                 /*更新中间表中的部门*/
                 deptRecordService.updateDept(syDepartmentId, syDeptParentId, departmentName);
                 logger.info("department update+++++++++++++++++++++++++++++++" + departmentName);
             }
             continue;
         }
+        return resultDeptIdList;
     }
 
     /*获取deptRecordId的集合*/

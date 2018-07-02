@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.oa.organization.dao.SyUserDao">
-    <!-- 目的:为DAO接口方法提供sql语句配置-->
+    <!-- 目的:批量创建人员不包括操作工-->
     <!--需要排除管理员,关闭所有的一级缓存flushCache="true"-->
     <select id="getUserList" resultType="com.oa.organization.entity.SyUser" flushCache="true">
       SELECT
@@ -22,121 +22,8 @@
             PLSTX AS "position"
         FROM
         T011
-        WHERE
-        ORGEH IN ('00000080',
-            '00000801',
-            '00000802',
-            '00000810',
-            '00010136',
-            '00000814',
-            '00000815',
-            '00000816',
-            '00010217',
-            '00000812',
-            '00010407',
-            '00010508',
-            '00010409',
-            '00010218',
-            '00010509',
-            '00010222',
-            '00010223',
-            '00010224',
-            '00010228',
-            '00010231',
-            '00010261',
-            '00010264',
-            '00010528',
-            '00010256',
-            '00010257',
-            '00010258',
-            '00010244',
-            '00010245',
-            '00010240',
-            '00010241',
-            '00010242',
-            '00010243',
-            '00010415',
-            '00010236',
-            '00010237',
-            '00010238',
-            '00010239',
-            '00010414',
-            '00010246',
-            '00010226',
-            '00010227',
-            '00010413',
-            '00010416',
-            '00010253',
-            '00010254',
-            '00010255',
-            '00010249',
-            '00010250',
-            '00010251',
-            '00010252',
-            '00010221',
-            '00010230',
-            '00010518',
-            '00010519',
-            '00010265',
-            '00010266',
-            '00010408',
-            '00010417',
-            '00010511',
-            '00010513',
-            '00010514',
-            '00010516',
-            '00010515',
-            '00010512',
-            '00010750',
-            '00010751',
-            '00000839',
-            '00000837',
-            '00000838',
-            '00010753',
-            '00000834',
-            '00000835',
-            '00000836',
-            '00010233',
-            '00010234',
-            '00010235',
-            '00000862',
-            '00010267',
-            '00010268',
-            '00010269',
-            '00010556',
-            '00000863',
-            '00010271',
-            '00000860',
-            '00010618',
-            '00000809',
-            '00000811',
-            '00010322',
-            '00010507',
-            '00010139',
-            '00010141',
-            '00010142',
-            '00010140',
-            '00010138',
-            '00000817',
-            '00010113',
-            '00000826',
-            '00010115',
-            '00010143',
-            '00000825',
-            '00000818',
-            '00000819',
-            '00000820',
-            '00000821',
-            '00000822',
-            '00010312',
-            '00000805',
-            '00000806',
-            '00000807',
-            '00000808',
-            '00010752',
-            '00000804'
-        ) AND STAT2 IN('0','1','2') AND  SEND_DATE =  CONVERT (VARCHAR(10), GETDATE(), 120)
-        AND PERSK &lt;&gt;'40' AND PERNR &lt;&gt; '110175' AND PERNR &lt;&gt; '202754' AND PERNR &lt;&gt; '120822' AND PERNR &lt;&gt; '111672'
+        WHERE STAT2 IN('0','1','2') AND  SEND_DATE =  CONVERT (VARCHAR(10), GETDATE(), 120)
+        AND PERSK &lt;&gt;'40'
     </select>
     <!-- 根据部门id查询部门下的成员-->
     <select id="getUserListByDeptId" parameterType="java.math.BigDecimal"
@@ -158,7 +45,7 @@
         FROM T011 WHERE ORGEH = #{deptId} AND STAT2 IN('0','1','2')
               AND SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND PERSK &lt;&gt;'40'
     </select>
-    <!-- 新增人员-->
+    <!-- 新增人员,新增人员不包括操作工-->
     <!--select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
     DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and not exists (select PERNR from dbo.T011 where
     DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR)-->
@@ -186,7 +73,7 @@
                                AND PERNR = t1.PERNR)
                                AND PERSK &lt;&gt;'40'
     </select>
-    <!--离职人员 -->
+    <!--离职人员，如果操作工离职并且在钉钉中也要删除 -->
     <!--select PERNR,NACHN,STAT2,GESCH,Z_GRPH,Z_BGSJ,Z_BGPH,Z_BGDZ,Z_GREM,Z_BGEM,ORGEH,STEXT from dbo.T011 as t1 where
     DATEDIFF(DY,SEND_DATE,GETDATE()) = 0 and STAT2 = 5 and exists (select STAT2 from dbo.T011 where
     DATEDIFF(DY,SEND_DATE,GETDATE()) = 1 and PERNR=t1.PERNR and STAT2 &lt;&gt; t1.STAT2)-->
@@ -207,10 +94,10 @@
             STEXT  AS "departmentName",
             PLSTX AS "position"
         FROM dbo.T011 AS t1
-        WHERE STAT2 IN ('4','5') AND PERSK &lt;&gt;'40'
+        WHERE STAT2 IN ('4','5')
         AND SEND_DATE=CONVERT (VARCHAR(10), GETDATE(), 120)
     </select>
-    <!--人员信息变更-->
+    <!--人员信息变更，操作工的信息发生变更，如果在钉钉中也要更新-->
     <select id="getUpdateUserList" parameterType="java.lang.Integer" resultType="com.oa.organization.entity.SyUser"
             flushCache="true">
         SELECT
@@ -234,7 +121,6 @@
                          WHERE DATEDIFF(DY, SEND_DATE, GETDATE()) = #{dateDiffer}
                                AND PERNR = t1.PERNR
                                AND (Z_BGEM &lt;&gt; t1.Z_BGEM OR NACHN &lt;&gt; t1.NACHN OR ORGEH &lt;&gt; t1.ORGEH OR PLSTX &lt;&gt; t1.PLSTX OR Z_BGSJ &lt;&gt; t1.Z_BGSJ))
-                               AND PERSK &lt;&gt;'40'
                                AND STAT2 IN('0','1','2')
     </select>
     <select id="getAllUserIdList" resultType="java.math.BigDecimal" flushCache="true">
@@ -242,10 +128,10 @@
             PERNR  AS "jobNumber"
         FROM T011
         WHERE STAT2 IN('0','1','2')
-              AND SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120) AND PERSK &lt;&gt;'40'
+              AND SEND_DATE = CONVERT (VARCHAR(10), GETDATE(), 120)
     </select>
     <!-- 更新,搁置，parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
-    <update id="updateUser" parameterType="java.util.HashMap" >
+    <update id="updateUser" parameterType="java.util.HashMap">
         UPDATE T011
         SET
             NACHN = #{chName},

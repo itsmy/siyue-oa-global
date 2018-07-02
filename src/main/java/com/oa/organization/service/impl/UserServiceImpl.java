@@ -1,8 +1,7 @@
 package com.oa.organization.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.dingtalk.open.client.api.model.corp.*;
-import com.oa.organization.entity.SyDepartment;
-import com.oa.organization.entity.UserRecord;
 import com.oa.organization.exception.OApiException;
 import com.oa.organization.service.*;
 import com.alibaba.fastjson.JSONObject;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DeptRecordService deptRecordService;
     @Autowired
-    private UserRecordService userRecordService;
+    private DepartmentService departmentService;
 
     @Override
     public CorpUserBaseInfo getUserInfo(String accessToken, String code) throws Exception {
@@ -120,12 +118,11 @@ public class UserServiceImpl implements UserService {
      *
      * @throws Exception
      */
-    public void createUserMut() throws Exception {
+    public List<String> createUserMut() throws Exception {
         String accessToken = AuthUtil.getAccessToken();
         List<SyUser> userList = getUserList();
         List<DeptRecord> deptList = deptRecordService.getDeptList();
-        createUser(accessToken, userList, deptList);
-
+        return createUser(accessToken, userList, deptList);
     }
 
     /**
@@ -133,11 +130,20 @@ public class UserServiceImpl implements UserService {
      *
      * @return
      */
-    public void updateUserMut(int dateDiffer) throws Exception {
+    public JSONArray updateUserMut(int dateDiffer) throws Exception {
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+
         List<DeptRecord> deptRecordList = deptRecordService.getDeptList();
-        addUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
-        updateUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
-        deleteUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
+        List<String> addUserList = addUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
+        List<String> updateUserList = updateUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
+        List<String> deleteUserList = deleteUser(AuthUtil.getAccessToken(), dateDiffer, deptRecordList);
+
+        jsonObject.put("addUserList", addUserList.toString());
+        jsonObject.put("updateUserList", updateUserList.toString());
+        jsonObject.put("deleteUserList", deleteUserList.toString());
+        jsonArray.add(jsonObject);
+        return jsonArray;
     }
 
     /**
@@ -147,7 +153,10 @@ public class UserServiceImpl implements UserService {
      * @param userList
      * @param deptRecordList
      */
-    private void createUser(String accessToken, List<SyUser> userList, List<DeptRecord> deptRecordList) throws Exception {
+    private List<String> createUser(String accessToken, List<SyUser> userList, List<DeptRecord> deptRecordList) throws Exception {
+        /* update返回的userId集合*/
+        List<String> resultIdList = new ArrayList<>();
+        String resultUserId = "";
         for (int i = 0; i < deptRecordList.size(); i++) {
             DeptRecord deptRecord = deptRecordList.get(i);
             BigDecimal erpId = deptRecord.getErpId();
@@ -164,7 +173,8 @@ public class UserServiceImpl implements UserService {
                         CorpUserDetail userDetail = setUserDetail(user, departmentId);
                         /*erp中人员的手机号码是否为空*/
                         if (userDetail != null) {
-                            createUser(accessToken, userDetail);
+                            resultUserId = createUser(accessToken, userDetail);
+                            resultIdList.add(resultUserId);
                             logger.info("create users++++++++++++++++++++++++++++++++++++++" + user.getChName());
                             Thread.sleep(60);
                         }
@@ -172,6 +182,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
+        return resultIdList;
     }
 
 
@@ -180,7 +191,10 @@ public class UserServiceImpl implements UserService {
      *
      * @throws Exception
      */
-    private void addUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
+    private List<String> addUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
+        /* update返回的userId集合*/
+        List<String> resultIdList = new ArrayList<>();
+        String resultUserId = "";
         List<SyUser> newUserList = syUserService.getNewUserList(dateDiffer);
         for (int i = 0; newUserList.size() > 0 && i < newUserList.size(); i++) {
             SyUser user = newUserList.get(i);
@@ -197,8 +211,9 @@ public class UserServiceImpl implements UserService {
                         CorpUserDetail userDetail = setUserDetail(user, deptDdId);
                         /*erp中人员的手机号码是否为空*/
                         if (userDetail != null) {
-                            createUser(accessToken, userDetail);
+                            resultUserId = createUser(accessToken, userDetail);
                             Thread.sleep(60);
+                            resultIdList.add(resultUserId);
                             logger.info("add users++++++++++++++++++++++++++++++++++++++" + user.getChName());
                         }
                     }
@@ -206,6 +221,7 @@ public class UserServiceImpl implements UserService {
             }
             continue;
         }
+        return resultIdList;
     }
 
     /**
@@ -215,7 +231,10 @@ public class UserServiceImpl implements UserService {
      * @param deptRecordList
      * @throws Exception
      */
-    private void deleteUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
+    private List<String> deleteUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
+        /* update返回的userId集合*/
+        List<String> resultIdList = new ArrayList<>();
+        String resultUserId = "";
         List<SyUser> leaveUserList = syUserService.getLeaveUserList(dateDiffer);
         for (int j = 0; leaveUserList.size() < 1000 && j < leaveUserList.size(); j++) {
             SyUser user = leaveUserList.get(j);
@@ -226,15 +245,17 @@ public class UserServiceImpl implements UserService {
                     DeptRecord deptRecord = deptRecordList.get(i);
                     BigDecimal deptErpId = deptRecord.getErpId();
                     if (deptErpId.equals(user.getDepartmentId())) {
-                        String userId = user.getJobNumber().toString();
-                        deleteUser(accessToken, userId);
+                        resultUserId = user.getJobNumber().toString();
+                        deleteUser(accessToken, resultUserId);
                         Thread.sleep(60);
+                        resultIdList.add(resultUserId);
                         logger.info("delete users ++++++++++++++++++" + user.getChName());
                     }
                 }
             }
             continue;
         }
+        return resultIdList;
     }
 
     /**
@@ -244,7 +265,10 @@ public class UserServiceImpl implements UserService {
      * @param accessToken
      * @param deptRecordList
      */
-    private void updateUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
+    private List<String> updateUser(String accessToken, int dateDiffer, List<DeptRecord> deptRecordList) throws Exception {
+        /* update返回的userId集合*/
+        List<String> resultIdList = new ArrayList<>();
+        String resultUserId = "";
         List<SyUser> updateUserList = syUserService.getUpdateUserList(dateDiffer);
         for (int j = 0; updateUserList.size() > 0 && j < updateUserList.size(); j++) {
             SyUser user = updateUserList.get(j);
@@ -257,7 +281,8 @@ public class UserServiceImpl implements UserService {
                     if (exist > 0) {
                         List<Long> departmentIdList = new ArrayList<Long>();
                         departmentIdList.add(deptDdId);
-                        CorpUserDetail dingTalkUser = getUser(accessToken, user.getJobNumber().toString());
+                        resultUserId = user.getJobNumber().toString();
+                        CorpUserDetail dingTalkUser = getUser(accessToken, resultUserId);
                         dingTalkUser.setName(user.getChName());
                         dingTalkUser.setEmail(user.getOfficeEmail());
                         dingTalkUser.setDepartment(departmentIdList);
@@ -265,16 +290,22 @@ public class UserServiceImpl implements UserService {
                         //调用钉钉员工接口
                         updateUser(accessToken, dingTalkUser);
                         Thread.sleep(60);
+                        resultIdList.add(resultUserId);
                         logger.info("update user++++++++++++++++++++++++" + user.getChName());
                     } else if (exist < 0 && !user.getOfficeMobile().equals("")) {
                         CorpUserDetail userDetail = setUserDetail(user, String.valueOf(deptDdId));
-                        createUser(accessToken, userDetail);
+                        if (userDetail != null) {
+                            resultUserId = createUser(accessToken, userDetail);
+                        }
+                        Thread.sleep(60);
+                        resultIdList.add(resultUserId);
                         logger.info("add user+++++++++++++++++++++++++++++++++++" + user.getChName());
                     }
                 }
                 continue;
             }
         }
+        return resultIdList;
     }
 
     /**
@@ -344,7 +375,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /*userId是否已经存在，如果是前台加入的用户，1,已存在，0不存在，-1不存在并报异常*/
-    private int isExist(String accessToken, String userId) {
+    public int isExist(String accessToken, String userId) {
         try {
             CorpUserDetail corpUserDetail = getUser(accessToken, userId);
             if (corpUserDetail != null) {
@@ -357,27 +388,30 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * 登录，已经经过前端和Interceptor验证，这里直接进行登录的信息。
-     *
-     * @param jsonObject
-     * @return
-     */
-    public String login(JSONObject jsonObject) {
-        String token = "";
-        String username = jsonObject.getString("username");
-        String password = jsonObject.getString("password");
-
-        //加密并且写session，本应该查询数据库验证，这里为了方便，写死用户名和密码
-        if ("202754".equals(username) && "qq565600".equals(password)) {
-            //使用spring自带的加密工具进行加密
-            token = DigestUtils.md5DigestAsHex((username + password).getBytes());
-        }
-        return token;
-    }
-
+    /*注意：对比删除的时候不能把操作工删除，操作工是从前台加进来的。*/
     @Override
-    public int compareUser() throws Exception {
-        return 0;
+    public List<CorpUserDetail> compareUser() throws Exception {
+        List<Department> departmentList = departmentService.listDepartments(AuthUtil.getAccessToken(), "1");
+        List<BigDecimal> userIdList = syUserService.getAllUserIdList();
+        List<CorpUserDetail> resultList = new ArrayList<CorpUserDetail>();
+        for (int i = 0; i < departmentList.size(); i++) {
+            Department department = departmentList.get(i);
+            long departmentId = department.getId();
+            CorpUserDetailList corpUserDetailList = getUserDetails(AuthUtil.getAccessToken(), departmentId, null, null, "");
+            Thread.sleep(60);
+            List<CorpUserDetail> userList = corpUserDetailList.getUserlist();
+            for (int j = 0; j < userList.size(); j++) {
+                CorpUserDetail userDetail = userList.get(j);
+                String userId = userDetail.getUserid();
+                BigDecimal userIdCompare = new BigDecimal(userId);
+                if (!userIdList.contains(userIdCompare)) {
+                    resultList.add(userDetail);
+                    deleteUser(AuthUtil.getAccessToken(), userId);
+                    logger.info("delete user++++++++++++++++++++++++++++++" + userDetail.getName());
+                }
+                continue;
+            }
+        }
+        return resultList;
     }
 }

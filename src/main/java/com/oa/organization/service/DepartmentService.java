@@ -1,5 +1,6 @@
 package com.oa.organization.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.dingtalk.open.client.api.model.corp.Department;
 import com.dingtalk.open.client.api.model.corp.DepartmentDetail;
 import com.dingtalk.open.client.common.SdkInitException;
@@ -72,5 +73,5 @@ public interface DepartmentService {
      * @return
      * @throws Exception
      */
-    void updateDeptMut() throws Exception;
+    JSONArray updateDeptMut() throws Exception;
 }

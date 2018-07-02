@@ -48,7 +48,7 @@ public interface DeptRecordDao {
      */
     List<DeptRecord> getDeptList();
 
-    /*查询所有部门的id*/
+    /*查询钉钉上所有部门的id*/
     List<BigDecimal> getSubDeptIdByParent();
 
     /**
