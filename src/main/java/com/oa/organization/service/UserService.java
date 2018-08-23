@@ -1,10 +1,7 @@
 package com.oa.organization.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dingtalk.open.client.api.model.corp.CorpUserBaseInfo;
-import com.dingtalk.open.client.api.model.corp.CorpUserDetail;
-import com.dingtalk.open.client.api.model.corp.CorpUserDetailList;
-import com.dingtalk.open.client.api.model.corp.CorpUserList;
+import com.dingtalk.open.client.api.model.corp.*;
 import com.oa.organization.exception.OApiException;
 
 import java.util.Date;
@@ -109,7 +106,7 @@ public interface UserService {
     Object updateUserMut(int dateDiffer) throws Exception;
 
     /*不属于我们公司的人员需要清理掉*/
-    List<CorpUserDetail> compareUser() throws Exception;
+    List<CorpUser> compareUser() throws Exception;
 
     // boolean reUpdateUsers(String accessToken) throws Exception;
     int isExist(String accessToken, String userId);

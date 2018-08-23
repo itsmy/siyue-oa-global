@@ -1,6 +1,7 @@
 package com.oa.organization.web;
 
 import com.alibaba.fastjson.JSONArray;
+import com.dingtalk.open.client.api.model.corp.CorpUser;
 import com.dingtalk.open.client.api.model.corp.CorpUserDetail;
 import com.oa.common.enums.ResultCode;
 import com.oa.common.vo.Result;
@@ -51,7 +52,7 @@ public class UserController {
     @RequestMapping(value = "/user/compare", method = RequestMethod.GET)
     public Result compareUser() throws Exception {
         logger.info("Entering...compareUser........................................");
-        List<CorpUserDetail> invalidUserList = userService.compareUser();
+        List<CorpUser> invalidUserList = userService.compareUser();
         logger.info("Existing...compareUser........................................");
         return new Result(ResultCode.SUCCESS, invalidUserList);
     }

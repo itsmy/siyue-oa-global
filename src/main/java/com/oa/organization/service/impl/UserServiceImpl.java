@@ -1,7 +1,10 @@
 package com.oa.organization.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.dingtalk.open.client.api.model.corp.*;
+import com.oa.organization.dao.SyExcludeUserDao;
+import com.oa.organization.entity.SyExcludeUser;
 import com.oa.organization.exception.OApiException;
 import com.oa.organization.service.*;
 import com.alibaba.fastjson.JSONObject;
@@ -31,6 +34,8 @@ public class UserServiceImpl implements UserService {
     private DeptRecordService deptRecordService;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private SyExcludeUserDao syExcludeUserDao;
 
     @Override
     public CorpUserBaseInfo getUserInfo(String accessToken, String code) throws Exception {
@@ -40,35 +45,46 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String createUser(String accessToken, CorpUserDetail userDetail) throws Exception {
-        CorpUserService corpUserService = ServiceFactory.getInstance().getOpenService(CorpUserService.class);
-        JSONObject js = (JSONObject) JSONObject.parse(userDetail.getOrderInDepts());
-        Map<Long, Long> orderInDepts = FileUtils.toHashMap(js);
+        String userId = "";
+        try {
+            CorpUserService corpUserService = ServiceFactory.getInstance().getOpenService(CorpUserService.class);
+            JSONObject js = (JSONObject) JSONObject.parse(userDetail.getOrderInDepts());
+            Map<Long, Long> orderInDepts = FileUtils.toHashMap(js);
 
-        String userId = corpUserService.createCorpUser(accessToken, userDetail.getUserid(), userDetail.getName(), orderInDepts,
-                userDetail.getDepartment(), userDetail.getPosition(), userDetail.getMobile(), userDetail.getTel(), userDetail.getWorkPlace(),
-                userDetail.getRemark(), userDetail.getEmail(), userDetail.getJobnumber(),
-                userDetail.getIsHide(), userDetail.getSenior(), userDetail.getExtattr());
-
+            userId = corpUserService.createCorpUser(accessToken, userDetail.getUserid(), userDetail.getName(), orderInDepts,
+                    userDetail.getDepartment(), userDetail.getPosition(), userDetail.getMobile(), userDetail.getTel(), userDetail.getWorkPlace(),
+                    userDetail.getRemark(), userDetail.getEmail(), userDetail.getJobnumber(),
+                    userDetail.getIsHide(), userDetail.getSenior(), userDetail.getExtattr());
+        } catch (Exception e) {
+            logger.error(userId, e.getMessage(), e);
+        }
         // 员工唯一标识ID
         return userId;
     }
 
     @Override
     public void updateUser(String accessToken, CorpUserDetail userDetail) throws Exception {
-        CorpUserService corpUserService = ServiceFactory.getInstance().getOpenService(CorpUserService.class);
-        JSONObject js = (JSONObject) JSONObject.parse(userDetail.getOrderInDepts());
-        Map<Long, Long> orderInDepts = FileUtils.toHashMap(js);
-
-        corpUserService.updateCorpUser(accessToken, userDetail.getUserid(), userDetail.getName(), orderInDepts,
-                userDetail.getDepartment(), userDetail.getPosition(), userDetail.getMobile(), userDetail.getTel(), userDetail.getWorkPlace(),
-                userDetail.getRemark(), userDetail.getEmail(), userDetail.getJobnumber(),
-                userDetail.getIsHide(), userDetail.getSenior(), userDetail.getExtattr());
+        try {
+            CorpUserService corpUserService = ServiceFactory.getInstance().getOpenService(CorpUserService.class);
+            JSONObject js = (JSONObject) JSONObject.parse(userDetail.getOrderInDepts());
+            Map<Long, Long> orderInDepts = FileUtils.toHashMap(js);
+            corpUserService.updateCorpUser(accessToken, userDetail.getUserid(), userDetail.getName(), orderInDepts,
+                    userDetail.getDepartment(), userDetail.getPosition(), userDetail.getMobile(), userDetail.getTel(), userDetail.getWorkPlace(),
+                    userDetail.getRemark(), userDetail.getEmail(), userDetail.getJobnumber(),
+                    userDetail.getIsHide(), userDetail.getSenior(), userDetail.getExtattr());
+        } catch (Exception e) {
+            logger.error(userDetail.getUserid(), e.getMessage(), e);
+        }
     }
 
     @Override
     public void deleteUser(String accessToken, String userId) throws Exception {
-        CorpUserService corpUserService = ServiceFactory.getInstance().getOpenService(CorpUserService.class);
-        corpUserService.deleteCorpUser(accessToken, userId);
+        try {
+            CorpUserService corpUserService = ServiceFactory.getInstance().getOpenService(CorpUserService.class);
+            corpUserService.deleteCorpUser(accessToken, userId);
+        } catch (Exception e) {
+            logger.error(userId, e.getMessage(), e);
+        }
     }
 
     @Override
@@ -174,10 +190,10 @@ public class UserServiceImpl implements UserService {
                         /*erp中人员的手机号码是否为空*/
                         if (userDetail != null) {
                             resultUserId = createUser(accessToken, userDetail);
-                            resultIdList.add(resultUserId);
-                            logger.info("create users++++++++++++++++++++++++++++++++++++++" + user.getChName());
+                            logger.info("create users++++++++++++++++++++++++++++++++++++++" + resultUserId);
                             Thread.sleep(60);
                         }
+                        resultIdList.add(resultUserId);
                     }
                 }
             }
@@ -212,10 +228,11 @@ public class UserServiceImpl implements UserService {
                         /*erp中人员的手机号码是否为空*/
                         if (userDetail != null) {
                             resultUserId = createUser(accessToken, userDetail);
+                            logger.info("create users++++++++++++++++++++++++++++++++++++++" + resultUserId);
                             Thread.sleep(60);
                             resultIdList.add(resultUserId);
-                            logger.info("add users++++++++++++++++++++++++++++++++++++++" + user.getChName());
                         }
+
                     }
                 }
             }
@@ -296,10 +313,10 @@ public class UserServiceImpl implements UserService {
                         CorpUserDetail userDetail = setUserDetail(user, String.valueOf(deptDdId));
                         if (userDetail != null) {
                             resultUserId = createUser(accessToken, userDetail);
+                            Thread.sleep(60);
+                            resultIdList.add(resultUserId);
+                            logger.info("add user+++++++++++++++++++++++++++++++++++" + user.getChName());
                         }
-                        Thread.sleep(60);
-                        resultIdList.add(resultUserId);
-                        logger.info("add user+++++++++++++++++++++++++++++++++++" + user.getChName());
                     }
                 }
                 continue;
@@ -316,13 +333,22 @@ public class UserServiceImpl implements UserService {
     private CorpUserDetail setUserDetail(SyUser user, String deptBackId) {
         //如果人员所属的部门和记录表中的部门id相同才创建，没有就返回null
         CorpUserDetail userDetail = new CorpUserDetail();
-        //主部门只有一个id,如果有多个则需要放开长度
-        List<Long> deptList = new ArrayList<Long>(1);
-        deptList.add(Long.parseLong(deptBackId));
         //为钉钉用户设置姓名
         userDetail.setName(user.getChName());
         //ERP系统的人员id可以直接当作userId
         userDetail.setUserid(user.getJobNumber().toString());
+        //主部门只有一个id,如果有多个则需要放开长度
+        List<Long> deptList = new ArrayList<Long>();
+        deptList.add(Long.parseLong(deptBackId));
+        /*将人员的辅助部门加进去，如果将辅助部门加进去，隐藏部门就会被冲掉*/
+/*        List<BigDecimal> deptErpIdList = syDepartmentService.getDeptIdByJobNum(user.getJobNumber());
+        for (int i = 0; i < deptErpIdList.size(); i++) {
+            DeptRecord deptRecord = deptRecordService.getDept(deptErpIdList.get(i));
+            if (deptRecord != null) {
+                deptList.add(Long.parseLong(deptRecord.getDdId()));
+            }
+        }*/
+
         //设置部门
         userDetail.setDepartment(deptList);
         /*办公手机*/
@@ -368,7 +394,7 @@ public class UserServiceImpl implements UserService {
         Pattern p = null;
         Matcher m = null;
         boolean b = false;
-        p = Pattern.compile("^[1][3,4,5,7,8,9][0-9]{9}$"); // 验证手机号
+        p = Pattern.compile("^[1][3,4,5,6,7,8,9][0-9]{9}$"); // 验证手机号
         m = p.matcher(str);
         b = m.matches();
         return b;
@@ -390,28 +416,52 @@ public class UserServiceImpl implements UserService {
 
     /*注意：对比删除的时候不能把操作工删除，操作工是从前台加进来的。*/
     @Override
-    public List<CorpUserDetail> compareUser() throws Exception {
+    public List<CorpUser> compareUser() throws Exception {
         List<Department> departmentList = departmentService.listDepartments(AuthUtil.getAccessToken(), "1");
         List<BigDecimal> userIdList = syUserService.getAllUserIdList();
-        List<CorpUserDetail> resultList = new ArrayList<CorpUserDetail>();
+        List<CorpUser> resultList = new ArrayList<CorpUser>();
         for (int i = 0; i < departmentList.size(); i++) {
             Department department = departmentList.get(i);
             long departmentId = department.getId();
-            CorpUserDetailList corpUserDetailList = getUserDetails(AuthUtil.getAccessToken(), departmentId, null, null, "");
+            CorpUserList corpUserList = getDepartmentUser(AuthUtil.getAccessToken(), departmentId, null, null, "");
             Thread.sleep(60);
-            List<CorpUserDetail> userList = corpUserDetailList.getUserlist();
+            List<CorpUser> userList = corpUserList.getUserlist();
             for (int j = 0; j < userList.size(); j++) {
-                CorpUserDetail userDetail = userList.get(j);
-                String userId = userDetail.getUserid();
-                BigDecimal userIdCompare = new BigDecimal(userId);
-                if (!userIdList.contains(userIdCompare)) {
-                    resultList.add(userDetail);
-                    deleteUser(AuthUtil.getAccessToken(), userId);
-                    logger.info("delete user++++++++++++++++++++++++++++++" + userDetail.getName());
+                CorpUser corpUser = userList.get(j);
+                String userDetailId = corpUser.getUserid();
+                /*需要判断中间数据库中的数据是否更新出错,小于50%代表差异在50%之内*/
+                if (userIdList.size() > 1500 && isContains(userIdList, userDetailId) <= 0 && !contains(userDetailId)) {
+                    deleteUser(AuthUtil.getAccessToken(), userDetailId);
+                    logger.info("delete user++++++++++++++++++++++++++++++" + corpUser.getName());
+                    resultList.add(corpUser);
                 }
                 continue;
             }
         }
         return resultList;
     }
+
+    /*如果人员的工号属于中间表排除的人员返回true*/
+    private boolean contains(String userId) {
+        List<String> excludeUserIdList = syExcludeUserDao.getExcludeUserIdList();
+        if (excludeUserIdList.contains(userId)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /*userDetailId不能转换成BigDecimal视为异常，钉钉自动生成的奇怪的userId*/
+    private int isContains(List<BigDecimal> userIdList, String userDetailId) {
+        try {
+            BigDecimal userId = new BigDecimal(userDetailId);
+            if (userIdList.contains(userId)) {
+                return 1;
+            }
+            return 0;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 }
+

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.organization.dao.SyExcludeUserDao">
+    <!-- 排除人员列表-->
+    <select id="getExcludeUserList" resultType="com.oa.organization.entity.SyExcludeUser" flushCache="true">
+      SELECT job_number AS jobNumber,
+          ch_name AS chName,
+          sex AS sex,
+          personal_mobile AS personalMobile,
+          office_mobile AS officeMobile
+      FROM
+          EXCLUDE_USER
+    </select>
+    <select id="getExcludeUserIdList" resultType="java.lang.String" flushCache="true">
+        SELECT job_number AS jobNumber
+        FROM
+        EXCLUDE_USER
+    </select>
+</mapper>

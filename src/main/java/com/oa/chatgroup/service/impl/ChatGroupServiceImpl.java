@@ -1,6 +1,8 @@
 package com.oa.chatgroup.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dingtalk.open.client.api.model.corp.CorpUserDetail;
+import com.dingtalk.open.client.api.model.corp.CorpUserDetailList;
 import com.oa.common.util.AuthUtil;
 import com.oa.common.util.HttpUtil;
 import com.oa.organization.entity.DeptRecord;
@@ -33,30 +35,29 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         try {
             return HttpUtil.httpPost("https://oapi.dingtalk.com/department/update?access_token=" + accessToken, jsonParam);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error(jsonParam.getString("id"), e.getMessage(), e);
             return null;
         }
     }
 
     @Override
     public int updateChatGroup(String accessToken, long departmentId, String orgDeptOwner) throws OApiException {
-        try {
-            JSONObject jsonParam = new JSONObject();
-            /*部门id*/
-            jsonParam.put("id", departmentId);
-            /*开启部门群*/
-            jsonParam.put("createDeptGroup", true);
-            /*部门群是否包含子部门*/
-            //jsonParam.put("groupContainSubDept", true);
-            /*设置群主*/
-            jsonParam.put("orgDeptOwner", orgDeptOwner);
-            /*调用更新部门的接口*/
-            JSONObject jsonObject = updateChatGroup(accessToken, jsonParam);
+
+        JSONObject jsonParam = new JSONObject();
+        /*部门id*/
+        jsonParam.put("id", departmentId);
+        /*开启部门群*/
+        jsonParam.put("createDeptGroup", true);
+        /*部门群是否包含子部门*/
+        //jsonParam.put("groupContainSubDept", true);
+        /*设置群主*/
+        jsonParam.put("orgDeptOwner", orgDeptOwner);
+        /*调用更新部门的接口*/
+        JSONObject jsonObject = updateChatGroup(accessToken, jsonParam);
+        if (jsonObject != null) {
             return 1;
-        } catch (Exception e) {
-            logger.error("orgDeptOwner!!!!!!!!!!!!!!!" + orgDeptOwner, e.getMessage(), e);
-            return 0;
         }
+        return 0;
     }
 
     @Override
@@ -83,4 +84,19 @@ public class ChatGroupServiceImpl implements ChatGroupService {
         }
         return num;
     }
+
+    /*    *//*如果该领导不在该部门，则把这个领导加到这个部门中*//*
+    private int isExist(String accessToken, long deptDdId, String deptLeader) throws Exception {
+        CorpUserDetailList corpUserDetailList = userService.getUserDetails(accessToken, deptDdId, null, null, "");
+        List<CorpUserDetail> userList = corpUserDetailList.getUserlist();
+        for (int i = 0; i < userList.size(); i++) {
+            CorpUserDetail userDetail = userList.get(i);
+            String userId = userDetail.getUserid();
+            if (deptLeader.equals(userId)) {
+                return 1;
+            }
+            break;
+        }
+        return 0;
+    }*/
 }

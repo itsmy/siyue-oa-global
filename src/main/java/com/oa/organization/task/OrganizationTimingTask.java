@@ -1,10 +1,10 @@
 package com.oa.organization.task;
 
-import com.dingtalk.open.client.api.model.corp.CorpUserDetail;
 import com.oa.common.util.DateUtil;
 import com.oa.organization.service.DepartmentService;
 import com.oa.organization.service.SyncLogService;
 import com.oa.organization.service.UserService;
+import com.oa.organization.service.impl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class OrganizationTimingTask {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
     @Autowired
     private SyncLogService syncLogService;
 
@@ -76,17 +76,17 @@ public class OrganizationTimingTask {
     }
 
     @Scheduled(cron = "0 0 2 * * *")
-    public void compareUser() throws Exception {
+    public void compareUser() {
         logger.info("compareUser......................START.....................");
         try {
-            List<CorpUserDetail> invalidUserList = userService.compareUser();
+            userService.compareUser();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
             logger.info("compareUser...................END.....................");
         }
     }
-/*    *//*每周执行一次全量同步防止漏掉的人*//*
+    /*    *//*每周执行一次全量同步防止漏掉的人*//*
     @Scheduled(cron = "0 0 3 * * WED")
     public void createUser(){
         logger.info("creteUser......................START.....................");
