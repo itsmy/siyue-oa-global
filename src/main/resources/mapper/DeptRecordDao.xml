@@ -41,7 +41,7 @@ company_name nvarchar(40)
             company_id AS "companyId",
             company_name  AS "companyName"
         FROM DEPT_RECORD
-        WHERE erp_id = #{erpId}
+        WHERE erp_id = #{deptErpId}
     </select>
     <!-- 查询多个部门 -->
     <select id="getDeptList" resultType="com.oa.organization.entity.DeptRecord" flushCache="true">
