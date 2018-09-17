@@ -19,7 +19,7 @@ company_name nvarchar(40)
     <!-- 删除-->
     <delete id="deleteDept" parameterType="java.math.BigDecimal">
         DELETE FROM DEPT_RECORD
-        WHERE erp_id = #{erpId}
+        WHERE erp_id = #{deptErpId}
     </delete>
     <!-- 更新,parentId会变，部门名字会变，对应的钉钉返回的部门id会变，而SAP中的部门objid不会变, -->
     <update id="updateDept" parameterType="java.util.HashMap">
